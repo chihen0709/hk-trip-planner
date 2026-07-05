@@ -4,9 +4,11 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
   background: #f4f7fb;
   color: #263241;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .app {
@@ -817,29 +819,35 @@ section > h2 {
 }
 
 .overview-header h2 {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   padding: 0;
-  color: #24364a;
-  font-size: 24px;
+  color: #1c2b3a;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .overview-eyebrow {
   margin: 0;
-  color: #2f9e8f;
+  color: #1f8277;
   font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   display: inline-flex;
   align-items: center;
   gap: 7px;
 }
 
 .overview-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 18px;
   padding: 20px clamp(18px, 3vw, 28px) 24px;
 }
 
 .overview-days {
+  flex: 1.4 1 320px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
@@ -854,12 +862,27 @@ section > h2 {
 }
 
 .overview-day h3 {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #16645c;
   font-size: 15px;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+}
+
+.overview-day-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #2f9e8f;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .overview-slot-list {
@@ -891,6 +914,8 @@ section > h2 {
   color: #2f9e8f;
   font-size: 12px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 
 .overview-slot.active {
@@ -900,6 +925,7 @@ section > h2 {
 }
 
 .overview-editor {
+  flex: 0.8 1 280px;
   display: flex;
   flex-direction: column;
   gap: 10px;

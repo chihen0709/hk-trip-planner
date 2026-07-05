@@ -98,7 +98,11 @@ function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onD
     if (!node) return;
     setIsExporting(true);
     try {
-      const dataUrl = await toPng(node, { backgroundColor: '#ffffff', pixelRatio: 2 });
+      const dataUrl = await toPng(node, {
+        backgroundColor: '#ffffff',
+        pixelRatio: 2,
+        filter: (el) => !el.dataset || el.dataset.exportExclude !== 'true',
+      });
       const link = document.createElement('a');
       link.download = '香港行程總覽.png';
       link.href = dataUrl;
@@ -123,6 +127,7 @@ function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onD
         <button
           type="button"
           className="overview-download-button"
+          data-export-exclude="true"
           onClick={handleDownload}
           disabled={isExporting}
         >
@@ -135,7 +140,10 @@ function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onD
         <div className="overview-days">
           {Object.entries(days).map(([day, daySlots]) => (
             <div className="overview-day" key={day}>
-              <h3>Day {day}</h3>
+              <h3>
+                <span className="overview-day-badge">{day}</span>
+                Day {day}
+              </h3>
               <div className="overview-slot-list">
                 {daySlots.map((slot) => (
                   <button
@@ -153,7 +161,7 @@ function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onD
           ))}
         </div>
 
-        <form className="overview-editor" onSubmit={handleSave}>
+        <form className="overview-editor" data-export-exclude="true" onSubmit={handleSave}>
           {draft && selectedSlot ? (
             <>
               <label className="field-label" htmlFor="overview-time">時間</label>
