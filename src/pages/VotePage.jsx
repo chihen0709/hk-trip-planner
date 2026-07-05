@@ -13,7 +13,6 @@ export default function VotePage() {
   const [pendingAttraction, setPendingAttraction] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loadError, setLoadError] = useState(null);
-  const [saveError, setSaveError] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -51,18 +50,12 @@ export default function VotePage() {
   }
 
   async function handleAddAttraction(data) {
-    setSaveError(null);
-    try {
-      const created = await addAttraction(data);
-      setAttractions((current) => [
-        ...current.filter((item) => item.id !== created.id),
-        created,
-      ]);
-      setShowAddForm(false);
-    } catch {
-      setSaveError('Firebase 目前沒有成功回寫，已先存到這台裝置；請稍後重整確認是否同步到大家的清單。');
-      setShowAddForm(false);
-    }
+    const created = await addAttraction(data);
+    setAttractions((current) => [
+      ...current.filter((item) => item.id !== created.id),
+      created,
+    ]);
+    setShowAddForm(false);
   }
 
   return (
@@ -106,7 +99,6 @@ export default function VotePage() {
           Firebase 讀取暫時失敗，畫面先顯示內建備份資料。錯誤: {loadError.code || loadError.message}
         </p>
       )}
-      {saveError && <p className="load-error">{saveError}</p>}
       {!loadError && attractions.length === 0 && <p className="load-empty">景點載入中…</p>}
 
       {Object.entries(grouped).map(([category, items]) => (
@@ -122,7 +114,6 @@ export default function VotePage() {
                 attraction={attraction}
                 voteCount={(votesByAttraction[attraction.id] || []).length}
                 onVote={() => {
-                  setSaveError(null);
                   setPendingAttraction(attraction);
                 }}
               />
