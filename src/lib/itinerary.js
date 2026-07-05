@@ -1,5 +1,6 @@
 import { db } from '../firebase';
 import {
+  addDoc,
   collection,
   doc,
   getDocs,
@@ -10,6 +11,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import seedSlots from '../../scripts/itinerarySlots.seed.json';
+import { withTimeout } from './asyncTimeout';
 
 const LOCAL_SLOTS_KEY = 'hk-trip-planner:local-itinerary-slots';
 
@@ -89,7 +91,35 @@ export async function updateSlot(slotId, fields) {
     return;
   }
 
-  await updateDoc(doc(db, 'itinerarySlots', slotId), fields);
+  await withTimeout(
+    updateDoc(doc(db, 'itinerarySlots', slotId), fields),
+    'Firebase 儲存行程逾時，請檢查網路後再試一次。'
+  );
+}
+
+export async function addSlot(fields) {
+  const slot = {
+    day: Number(fields.day),
+    order: Number(fields.order),
+    time: fields.time,
+    title: fields.title,
+    location: fields.location || '',
+    note: fields.note || '',
+    linkedAttractionId: fields.linkedAttractionId || null,
+  };
+
+  try {
+    const ref = await withTimeout(
+      addDoc(collection(db, 'itinerarySlots'), slot),
+      'Firebase 新增行程逾時，請檢查網路後再試一次。'
+    );
+    return { id: ref.id, ...slot };
+  } catch (error) {
+    const id = `local-${Date.now()}`;
+    const localSlot = { id, ...slot };
+    writeLocalSlots(mergeSlots(readLocalSlots(), [localSlot]));
+    throw Object.assign(error, { localSlot });
+  }
 }
 
 export async function reorderDaySlots(day, orderedSlotIds) {
@@ -99,5 +129,26 @@ export async function reorderDaySlots(day, orderedSlotIds) {
       batch.update(doc(db, 'itinerarySlots', slotId), { order: index });
     }
   });
-  await batch.commit();
+  await withTimeout(
+    batch.commit(),
+    'Firebase 排序行程逾時，請檢查網路後再試一次。'
+  );
+
+  const localSlots = readLocalSlots();
+  const fallbackById = new Map(fallbackSlots().map((slot) => [slot.id, slot]));
+  const seedOrderOverrides = orderedSlotIds
+    .filter((slotId) => slotId.startsWith('seed-'))
+    .map((slotId, index) => ({
+      ...fallbackById.get(slotId),
+      id: slotId,
+      day,
+      order: index,
+    }));
+
+  const updatedLocalSlots = localSlots.map((slot) => {
+    if (slot.day !== day) return slot;
+    const index = orderedSlotIds.indexOf(slot.id);
+    return index >= 0 ? { ...slot, order: index } : slot;
+  });
+  writeLocalSlots(mergeSlots(updatedLocalSlots, seedOrderOverrides));
 }

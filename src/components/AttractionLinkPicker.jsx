@@ -9,10 +9,10 @@ export default function AttractionLinkPicker({
       value={linkedAttractionId || ''}
       onChange={(e) => onChange(e.target.value || null)}
     >
-      <option value="">(未引用景點)</option>
-      {attractions.map((a) => (
-        <option key={a.id} value={a.id}>
-          {a.name}({(votesByAttraction[a.id] || []).length} 票)
+      <option value="">不連結候選景點</option>
+      {attractions.map((attraction) => (
+        <option key={attraction.id} value={attraction.id}>
+          {attraction.name} ({(votesByAttraction[attraction.id] || []).length} 票)
         </option>
       ))}
     </select>

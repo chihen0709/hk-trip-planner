@@ -61,7 +61,7 @@ export default function NicknamePrompt({
           {error && <p className="error" role="alert">{error}</p>}
           <div className="modal-actions">
             {onCancel && (
-              <button type="button" className="secondary" onClick={onCancel} disabled={isSubmitting}>
+              <button type="button" className="secondary" onClick={onCancel}>
                 取消
               </button>
             )}

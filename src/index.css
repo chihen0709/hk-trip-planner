@@ -348,31 +348,49 @@ section > h2 {
 }
 
 .itinerary-card.editing input,
-.itinerary-card.editing textarea {
-  padding: 8px;
+.itinerary-card.editing textarea,
+.itinerary-card.editing select {
+  min-height: 42px;
+  padding: 9px 12px;
   border-radius: 8px;
   border: 1px solid #d0d0d5;
-  font-size: 14px;
+  font-size: 15px;
   font-family: inherit;
 }
 
-.itinerary-card button {
+.slot-edit-button {
   align-self: flex-start;
   margin-top: 8px;
-  padding: 4px 12px;
-  border-radius: 16px;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
   border: 1px solid #d0d0d5;
   background: #f5f5f7;
+  color: #334155;
   cursor: pointer;
 }
 
 .drag-handle {
   cursor: grab;
   color: #7b8da1;
-  font-size: 18px;
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+
+.drag-handle:hover,
+.drag-handle:focus-visible {
+  background: #edf3fb;
+  color: #334155;
 }
 
 .linked-attraction {
@@ -381,8 +399,49 @@ section > h2 {
   font-size: 13px;
   padding: 4px 8px;
   border-radius: 8px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin: 4px 0;
+}
+
+.slot-edit-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.slot-edit-actions button,
+.add-slot-button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #2f9e8f;
+  background: #2f9e8f;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.slot-edit-actions button.secondary {
+  background: white;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.slot-edit-actions button:disabled,
+.add-slot-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.itinerary-card .error {
+  margin: 0;
+  color: #d70015;
+  font-size: 14px;
 }
 
 .vote-page-header {
@@ -521,12 +580,25 @@ section > h2 {
   border-left: 6px solid #8bc8f7;
 }
 
-.itinerary-page > section > h2 {
-  margin: 0 0 14px;
+.day-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 18px 0 0;
+  margin: 0 0 14px;
+}
+
+.day-heading h2 {
+  margin: 0 0 14px;
+  padding: 0;
   font-size: 26px;
   line-height: 1.2;
   color: #2f4054;
+}
+
+.day-heading h2 {
+  margin: 0;
 }
 
 @media (max-width: 640px) {

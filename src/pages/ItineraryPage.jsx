@@ -1,31 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   DndContext,
-  closestCenter,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import {
   SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
   arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { subscribeToItinerarySlots, updateSlot, reorderDaySlots } from '../lib/itinerary';
+import { Plus } from 'lucide-react';
+import {
+  addSlot,
+  reorderDaySlots,
+  subscribeToItinerarySlots,
+  updateSlot,
+} from '../lib/itinerary';
 import { subscribeToAttractions } from '../lib/attractions';
 import { subscribeToAllVotes } from '../lib/votes';
+import AttractionLinkPicker from '../components/AttractionLinkPicker';
 import ItinerarySlotCard from '../components/ItinerarySlotCard';
 
 function SortableSlot({ slot, onUpdate, attractions, votesByAttraction }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: slot.id,
   });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.62 : 1,
+    zIndex: isDragging ? 2 : 1,
   };
+
   return (
     <div ref={setNodeRef} style={style}>
       <ItinerarySlotCard
@@ -39,52 +49,196 @@ function SortableSlot({ slot, onUpdate, attractions, votesByAttraction }) {
   );
 }
 
+function NewSlotForm({ day, nextOrder, attractions, votesByAttraction, onSubmit, onCancel }) {
+  const [draft, setDraft] = useState({
+    day: Number(day),
+    order: nextOrder,
+    time: '',
+    title: '',
+    location: '',
+    note: '',
+    linkedAttractionId: null,
+  });
+  const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!draft.time.trim() || !draft.title.trim()) {
+      setError('請填寫時間與標題。');
+      return;
+    }
+
+    setIsSaving(true);
+    setError('');
+    try {
+      await onSubmit({
+        ...draft,
+        time: draft.time.trim(),
+        title: draft.title.trim(),
+        location: draft.location.trim(),
+        note: draft.note.trim(),
+      });
+    } catch (submitError) {
+      setError(submitError.message || '新增失敗，請稍後再試。');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <form className="itinerary-card editing" onSubmit={handleSubmit}>
+      <label className="field-label" htmlFor={`new-time-${day}`}>時間</label>
+      <input
+        id={`new-time-${day}`}
+        value={draft.time}
+        onChange={(e) => setDraft({ ...draft, time: e.target.value })}
+        placeholder="例如：14:00-15:30"
+      />
+
+      <label className="field-label" htmlFor={`new-title-${day}`}>標題</label>
+      <input
+        id={`new-title-${day}`}
+        value={draft.title}
+        onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+        placeholder="例如：下午茶"
+      />
+
+      <label className="field-label" htmlFor={`new-location-${day}`}>地點</label>
+      <input
+        id={`new-location-${day}`}
+        value={draft.location}
+        onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+        placeholder="例如：中環"
+      />
+
+      <label className="field-label" htmlFor={`new-note-${day}`}>備註</label>
+      <textarea
+        id={`new-note-${day}`}
+        value={draft.note}
+        onChange={(e) => setDraft({ ...draft, note: e.target.value })}
+        placeholder="補充交通、必吃、集合時間等"
+      />
+
+      <label className="field-label">連結候選景點</label>
+      <AttractionLinkPicker
+        attractions={attractions}
+        votesByAttraction={votesByAttraction}
+        linkedAttractionId={draft.linkedAttractionId}
+        onChange={(id) => setDraft({ ...draft, linkedAttractionId: id })}
+      />
+
+      {error && <p className="error" role="alert">{error}</p>}
+      <div className="slot-edit-actions">
+        <button type="button" className="secondary" onClick={onCancel} disabled={isSaving}>
+          取消
+        </button>
+        <button type="submit" disabled={isSaving}>
+          {isSaving ? '新增中…' : '新增時段'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export default function ItineraryPage() {
   const [slots, setSlots] = useState([]);
   const [attractions, setAttractions] = useState([]);
   const [votesByAttraction, setVotesByAttraction] = useState({});
   const [loadError, setLoadError] = useState(null);
-  const sensors = useSensors(useSensor(PointerSensor));
+  const [addingDay, setAddingDay] = useState(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 },
+    })
+  );
 
   useEffect(() => subscribeToItinerarySlots(setSlots, setLoadError), []);
   useEffect(() => subscribeToAttractions(setAttractions), []);
   useEffect(() => subscribeToAllVotes(setVotesByAttraction), []);
 
-  const days = slots.reduce((acc, slot) => {
-    acc[slot.day] = acc[slot.day] || [];
-    acc[slot.day].push(slot);
-    return acc;
-  }, {});
+  const days = useMemo(() => {
+    return slots.reduce((acc, slot) => {
+      acc[slot.day] = acc[slot.day] || [];
+      acc[slot.day].push(slot);
+      acc[slot.day].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+      return acc;
+    }, {});
+  }, [slots]);
+
+  async function handleUpdateSlot(slotId, fields) {
+    setSlots((current) =>
+      current.map((slot) => (slot.id === slotId ? { ...slot, ...fields } : slot))
+    );
+    await updateSlot(slotId, fields);
+  }
 
   function handleDragEnd(day, daySlots) {
-    return (event) => {
+    return async (event) => {
       const { active, over } = event;
       if (!over || active.id === over.id) return;
-      const oldIndex = daySlots.findIndex((s) => s.id === active.id);
-      const newIndex = daySlots.findIndex((s) => s.id === over.id);
-      const reordered = arrayMove(daySlots, oldIndex, newIndex);
-      reorderDaySlots(Number(day), reordered.map((s) => s.id));
+      const oldIndex = daySlots.findIndex((slot) => slot.id === active.id);
+      const newIndex = daySlots.findIndex((slot) => slot.id === over.id);
+      if (oldIndex < 0 || newIndex < 0) return;
+
+      const reordered = arrayMove(daySlots, oldIndex, newIndex).map((slot, index) => ({
+        ...slot,
+        order: index,
+      }));
+
+      setSlots((current) =>
+        current.map((slot) => reordered.find((item) => item.id === slot.id) || slot)
+      );
+
+      try {
+        await reorderDaySlots(Number(day), reordered.map((slot) => slot.id));
+      } catch (error) {
+        setLoadError(error);
+      }
     };
+  }
+
+  async function handleAddSlot(day, daySlots, fields) {
+    try {
+      const created = await addSlot(fields);
+      setSlots((current) => [...current, created]);
+      setAddingDay(null);
+    } catch (error) {
+      if (error.localSlot) {
+        setSlots((current) => [...current, error.localSlot]);
+        setAddingDay(null);
+        return;
+      }
+      throw error;
+    }
   }
 
   return (
     <div className="itinerary-page">
       {loadError && (
         <p className="load-error">
-          讀取行程失敗: {loadError.code || loadError.message}。可能是網路連線問題，請重新整理再試一次。
+          讀取或儲存行程失敗: {loadError.code || loadError.message}。請檢查網路後再試一次。
         </p>
       )}
       {!loadError && slots.length === 0 && <p className="load-empty">行程載入中…</p>}
+
       {Object.entries(days).map(([day, daySlots]) => (
         <section key={day}>
-          <h2>Day {day}</h2>
+          <div className="day-heading">
+            <h2>Day {day}</h2>
+            <button className="add-slot-button" type="button" onClick={() => setAddingDay(day)}>
+              <Plus size={17} aria-hidden="true" />
+              新增時段
+            </button>
+          </div>
+
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd(day, daySlots)}
           >
             <SortableContext
-              items={daySlots.map((s) => s.id)}
+              items={daySlots.map((slot) => slot.id)}
               strategy={verticalListSortingStrategy}
             >
               <div className="card-list">
@@ -92,7 +246,7 @@ export default function ItineraryPage() {
                   <SortableSlot
                     key={slot.id}
                     slot={slot}
-                    onUpdate={updateSlot}
+                    onUpdate={handleUpdateSlot}
                     attractions={attractions}
                     votesByAttraction={votesByAttraction}
                   />
@@ -100,6 +254,17 @@ export default function ItineraryPage() {
               </div>
             </SortableContext>
           </DndContext>
+
+          {addingDay === day && (
+            <NewSlotForm
+              day={day}
+              nextOrder={daySlots.length}
+              attractions={attractions}
+              votesByAttraction={votesByAttraction}
+              onSubmit={(fields) => handleAddSlot(day, daySlots, fields)}
+              onCancel={() => setAddingDay(null)}
+            />
+          )}
         </section>
       ))}
     </div>

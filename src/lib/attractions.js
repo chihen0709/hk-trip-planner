@@ -9,6 +9,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import seedAttractions from '../../scripts/attractions.seed.json';
+import { withTimeout } from './asyncTimeout';
 
 const LOCAL_ATTRACTIONS_KEY = 'hk-trip-planner:local-attractions';
 
@@ -47,6 +48,22 @@ function attractionDocId(name) {
     .toLowerCase()
     .replace(/[/.#$[\]]/g, '-')
     .replace(/\s+/g, '-')}`;
+}
+
+async function upsertAttraction(id, attraction) {
+  try {
+    await withTimeout(
+      setDoc(doc(db, 'attractions', id), attraction),
+      'Firebase 寫入逾時，請檢查網路後再試一次。'
+    );
+  } catch (error) {
+    if (error.code !== 'permission-denied') throw error;
+
+    await withTimeout(
+      setDoc(doc(db, 'attractions', `${id}-${Date.now()}`), attraction),
+      'Firebase 寫入逾時，請檢查網路後再試一次。'
+    );
+  }
 }
 
 export function subscribeToAttractions(callback, onError) {
@@ -90,7 +107,7 @@ export async function addAttraction({ name, category, note, suggestedDay, statio
 
   try {
     const { id: _id, ...data } = attraction;
-    await setDoc(doc(db, 'attractions', id), data, { merge: true });
+    await upsertAttraction(id, data);
   } catch (error) {
     console.error('addAttraction Firestore write failed, saved locally:', error);
     writeLocalAttraction(attraction);

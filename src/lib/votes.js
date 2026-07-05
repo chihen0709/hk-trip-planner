@@ -7,6 +7,7 @@ import {
   serverTimestamp,
   setDoc,
 } from 'firebase/firestore';
+import { withTimeout } from './asyncTimeout';
 
 function voteDocId(attractionId, nickname) {
   return `${attractionId}_${nickname.trim()}`;
@@ -31,11 +32,14 @@ export async function submitVote(attractionId, nickname) {
 
   const ref = doc(db, 'votes', voteDocId(attractionId, cleanNickname));
 
-  await setDoc(ref, {
-    attractionId,
-    nickname: cleanNickname,
-    createdAt: serverTimestamp(),
-  });
+  await withTimeout(
+    setDoc(ref, {
+      attractionId,
+      nickname: cleanNickname,
+      createdAt: serverTimestamp(),
+    }),
+    'Firebase 投票逾時，請檢查網路後再試一次。'
+  );
 }
 
 export function subscribeToAllVotes(callback, onError) {

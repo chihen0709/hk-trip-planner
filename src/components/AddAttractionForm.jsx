@@ -87,7 +87,7 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
 
           {error && <p className="error" role="alert">{error}</p>}
           <div className="modal-actions">
-            <button type="button" className="secondary" onClick={onClose} disabled={isSaving}>
+            <button type="button" className="secondary" onClick={onClose}>
               取消
             </button>
             <button type="submit" disabled={isSaving}>
