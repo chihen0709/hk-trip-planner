@@ -1,14 +1,63 @@
 import { db } from '../firebase';
-import { collection, addDoc, getDocs, onSnapshot, orderBy, query } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  setDoc,
+} from 'firebase/firestore';
+import seedAttractions from '../../scripts/attractions.seed.json';
+
+const LOCAL_ATTRACTIONS_KEY = 'hk-trip-planner:local-attractions';
+
+function readLocalAttractions() {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_ATTRACTIONS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalAttraction(attraction) {
+  const existing = readLocalAttractions().filter((item) => item.id !== attraction.id);
+  localStorage.setItem(LOCAL_ATTRACTIONS_KEY, JSON.stringify([...existing, attraction]));
+}
+
+function mergeAttractions(...lists) {
+  const byId = new Map();
+  lists.flat().forEach((item) => {
+    if (item?.id) byId.set(item.id, item);
+  });
+  return [...byId.values()].sort((a, b) => {
+    const dayDiff = (a.suggestedDay ?? 99) - (b.suggestedDay ?? 99);
+    if (dayDiff !== 0) return dayDiff;
+    return String(a.name).localeCompare(String(b.name), 'zh-Hant');
+  });
+}
+
+function fallbackAttractions() {
+  return mergeAttractions(seedAttractions, readLocalAttractions());
+}
+
+function attractionDocId(name) {
+  return `manual-${name
+    .trim()
+    .toLowerCase()
+    .replace(/[/.#$[\]]/g, '-')
+    .replace(/\s+/g, '-')}`;
+}
 
 export function subscribeToAttractions(callback, onError) {
   const q = query(collection(db, 'attractions'), orderBy('suggestedDay'));
 
-  // 有些網路環境會擋掉即時監聽用的串流連線,先用一次性讀取確保畫面
-  // 至少能顯示資料,不會一直卡在「載入中」。
+  callback(fallbackAttractions());
+
   getDocs(q)
     .then((snapshot) => {
-      callback(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+      const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      callback(mergeAttractions(seedAttractions, readLocalAttractions(), remote));
     })
     .catch((error) => {
       console.error('subscribeToAttractions initial fetch failed:', error);
@@ -18,8 +67,8 @@ export function subscribeToAttractions(callback, onError) {
   return onSnapshot(
     q,
     (snapshot) => {
-      const attractions = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      callback(attractions);
+      const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      callback(mergeAttractions(seedAttractions, readLocalAttractions(), remote));
     },
     (error) => {
       console.error('subscribeToAttractions listener failed:', error);
@@ -29,5 +78,25 @@ export function subscribeToAttractions(callback, onError) {
 }
 
 export async function addAttraction({ name, category, note, suggestedDay, station }) {
-  await addDoc(collection(db, 'attractions'), { name, category, note, suggestedDay, station });
+  const id = attractionDocId(name);
+  const attraction = {
+    id,
+    name,
+    category,
+    note,
+    station,
+    suggestedDay,
+  };
+
+  try {
+    const { id: _id, ...data } = attraction;
+    await setDoc(doc(db, 'attractions', id), data, { merge: true });
+  } catch (error) {
+    console.error('addAttraction Firestore write failed, saved locally:', error);
+    writeLocalAttraction(attraction);
+    throw error;
+  }
+
+  writeLocalAttraction(attraction);
+  return attraction;
 }

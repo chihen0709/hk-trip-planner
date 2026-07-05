@@ -5,17 +5,25 @@
 body {
   margin: 0;
   font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  background: #f4f7fb;
+  color: #263241;
+}
+
+.app {
+  min-height: 100vh;
 }
 
 .navbar {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 20px;
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 10px clamp(16px, 4vw, 48px);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid #dce6ef;
+  backdrop-filter: blur(12px);
 }
 
 .navbar a {
@@ -27,7 +35,8 @@ body {
 }
 
 .navbar a.active {
-  background: #e8e8ed;
+  background: #eaf1fb;
+  color: #244f7a;
 }
 
 .nickname-badge {
@@ -125,32 +134,46 @@ body {
   color: #2f9e8f;
 }
 
+.vote-page,
+.itinerary-page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 18px 0 48px;
+}
+
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
-  padding: 0 20px 20px;
+  padding: 0 clamp(16px, 4vw, 28px) 20px;
 }
 
 .card-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 20px 20px;
+  padding: 0;
 }
 
 section > h2 {
-  padding: 16px 20px 0;
+  padding: 16px clamp(16px, 4vw, 28px) 0;
 }
 
 .vote-card {
   background: white;
-  border-radius: 12px;
+  border: 1px solid #dfe8f0;
+  border-radius: 10px;
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 22px rgba(35, 65, 94, 0.06);
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.vote-card h3 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.35;
 }
 
 .vote-card-top {
@@ -161,11 +184,11 @@ section > h2 {
 }
 
 .station-badge {
-  background: #ffeef0;
-  color: #d70050;
+  background: #fff1d6;
+  color: #8a5a00;
   font-size: 12px;
   padding: 3px 8px;
-  border-radius: 10px;
+  border-radius: 999px;
   white-space: nowrap;
 }
 
@@ -214,19 +237,30 @@ section > h2 {
 
 .itinerary-card {
   background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dfe8f0;
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 22px rgba(35, 65, 94, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   position: relative;
 }
 
 .itinerary-card .time {
+  width: max-content;
+  border-radius: 999px;
+  background: #edf3fb;
+  padding: 7px 14px;
   font-size: 13px;
-  color: #2f9e8f;
+  color: #3f5268;
   font-weight: 600;
+}
+
+.itinerary-card h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.35;
 }
 
 .itinerary-card .location,
@@ -257,9 +291,11 @@ section > h2 {
 
 .drag-handle {
   cursor: grab;
-  color: #a0a0a5;
+  color: #7b8da1;
   font-size: 18px;
-  align-self: flex-end;
+  position: absolute;
+  top: 14px;
+  right: 16px;
 }
 
 .linked-attraction {
@@ -278,7 +314,7 @@ section > h2 {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  margin: 20px;
+  margin: 0 clamp(16px, 4vw, 28px) 20px;
 }
 
 .donut-chart-wrap {
@@ -287,8 +323,9 @@ section > h2 {
   gap: 24px;
   padding: 20px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dfe8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(35, 65, 94, 0.06);
   flex-wrap: wrap;
   flex: 1;
 }
@@ -364,7 +401,7 @@ section > h2 {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: 0 20px 20px;
+  margin: 0 clamp(16px, 4vw, 28px) 20px;
 }
 
 .search-input {
@@ -391,4 +428,41 @@ section > h2 {
   background: #2f9e8f;
   border-color: #2f9e8f;
   color: white;
+}
+
+.itinerary-page > section {
+  margin: 0 clamp(16px, 4vw, 28px) 22px;
+  padding: 0 0 2px 18px;
+  border-left: 6px solid #8bc8f7;
+}
+
+.itinerary-page > section > h2 {
+  margin: 0 0 14px;
+  padding: 18px 0 0;
+  font-size: 26px;
+  line-height: 1.2;
+  color: #2f4054;
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    gap: 8px;
+  }
+
+  .vote-page-header {
+    align-items: stretch;
+  }
+
+  .add-attraction-button {
+    width: 100%;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .itinerary-page > section {
+    margin-inline: 14px;
+    padding-left: 12px;
+  }
 }

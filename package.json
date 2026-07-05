@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "seed:attractions": "node scripts/seed-attractions.mjs",
+    "seed:reference-attractions": "node scripts/add-reference-attractions.mjs",
     "seed:itinerary": "node scripts/seed-itinerary.mjs"
   },
   "dependencies": {

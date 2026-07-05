@@ -7,21 +7,30 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
   const [note, setNote] = useState('');
   const [station, setStation] = useState('');
   const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const trimmedName = name.trim();
     if (!trimmedName) {
       setError('請輸入景點名稱');
       return;
     }
-    onSubmit({
-      name: trimmedName,
-      category,
-      note: note.trim(),
-      station: station.trim(),
-      suggestedDay: 99,
-    });
+    setIsSaving(true);
+    setError('');
+    try {
+      await onSubmit({
+        name: trimmedName,
+        category,
+        note: note.trim(),
+        station: station.trim(),
+        suggestedDay: 99,
+      });
+    } catch {
+      setError('Firebase 回寫失敗，已先保存在這台裝置。');
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -64,7 +73,9 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
             <button type="button" className="secondary" onClick={onClose}>
               取消
             </button>
-            <button type="submit">新增</button>
+            <button type="submit" disabled={isSaving}>
+              {isSaving ? '儲存中…' : '新增'}
+            </button>
           </div>
         </div>
       </form>

@@ -13,6 +13,7 @@ export default function VotePage({ nickname, onSetNickname }) {
   const [pendingVoteId, setPendingVoteId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loadError, setLoadError] = useState(null);
+  const [saveError, setSaveError] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -33,25 +34,47 @@ export default function VotePage({ nickname, onSetNickname }) {
     return acc;
   }, {});
 
-  function handleToggle(attraction, hasVoted) {
+  async function handleToggle(attraction, hasVoted) {
     if (!nickname) {
       setPendingVoteId(attraction.id);
       return;
     }
-    toggleVote(attraction.id, nickname, hasVoted);
+
+    setVotesByAttraction((current) => {
+      const voters = new Set(current[attraction.id] || []);
+      if (hasVoted) voters.delete(nickname);
+      else voters.add(nickname);
+      return { ...current, [attraction.id]: [...voters] };
+    });
+    await toggleVote(attraction.id, nickname, hasVoted);
   }
 
-  function handleNicknameConfirm(name) {
+  async function handleNicknameConfirm(name) {
     onSetNickname(name);
     if (pendingVoteId) {
-      toggleVote(pendingVoteId, name, false);
+      setVotesByAttraction((current) => {
+        const voters = new Set(current[pendingVoteId] || []);
+        voters.add(name);
+        return { ...current, [pendingVoteId]: [...voters] };
+      });
+      await toggleVote(pendingVoteId, name, false);
     }
     setPendingVoteId(null);
   }
 
-  function handleAddAttraction(data) {
-    addAttraction(data);
-    setShowAddForm(false);
+  async function handleAddAttraction(data) {
+    setSaveError(null);
+    try {
+      const created = await addAttraction(data);
+      setAttractions((current) => [
+        ...current.filter((item) => item.id !== created.id),
+        created,
+      ]);
+      setShowAddForm(false);
+    } catch {
+      setSaveError('Firebase 目前沒有成功回寫，已先存到這台裝置；請稍後重整確認是否同步到大家的清單。');
+      setShowAddForm(false);
+    }
   }
 
   return (
@@ -88,9 +111,10 @@ export default function VotePage({ nickname, onSetNickname }) {
       </div>
       {loadError && (
         <p className="load-error">
-          ⚠️ 讀取景點失敗:{loadError.code || loadError.message}。可能是網路連線問題或瀏覽器擴充功能封鎖了連線,請重新整理再試一次。
+          ⚠️ Firebase 讀取暫時失敗，畫面先顯示內建備份資料。錯誤:{loadError.code || loadError.message}
         </p>
       )}
+      {saveError && <p className="load-error">{saveError}</p>}
       {!loadError && attractions.length === 0 && <p className="load-empty">景點載入中…</p>}
       {Object.entries(grouped).map(([category, items]) => (
         <section key={category}>
