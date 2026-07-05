@@ -2,6 +2,7 @@ import { db } from '../firebase';
 import {
   collection,
   doc,
+  getDocs,
   updateDoc,
   onSnapshot,
   orderBy,
@@ -15,6 +16,17 @@ export function subscribeToItinerarySlots(callback, onError) {
     orderBy('day'),
     orderBy('order')
   );
+
+  // 一次性讀取當保底,避免即時監聽連不上時畫面一直卡在載入中。
+  getDocs(q)
+    .then((snapshot) => {
+      callback(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+    })
+    .catch((error) => {
+      console.error('subscribeToItinerarySlots initial fetch failed:', error);
+      if (onError) onError(error);
+    });
+
   return onSnapshot(
     q,
     (snapshot) => {
@@ -22,7 +34,7 @@ export function subscribeToItinerarySlots(callback, onError) {
       callback(slots);
     },
     (error) => {
-      console.error('subscribeToItinerarySlots failed:', error);
+      console.error('subscribeToItinerarySlots listener failed:', error);
       if (onError) onError(error);
     }
   );

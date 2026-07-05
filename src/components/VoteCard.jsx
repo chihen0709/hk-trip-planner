@@ -7,9 +7,12 @@ function buildMapUrl(name) {
 export default function VoteCard({ attraction, voteCount, hasVoted, onToggle }) {
   return (
     <div className="vote-card">
-      <h3>
-        {getCategoryIcon(attraction.category)} {attraction.name}
-      </h3>
+      <div className="vote-card-top">
+        <h3>
+          {getCategoryIcon(attraction.category)} {attraction.name}
+        </h3>
+        {attraction.station && <span className="station-badge">📍 {attraction.station}</span>}
+      </div>
       {attraction.note && <p className="note">{attraction.note}</p>}
       <div className="vote-row">
         <button

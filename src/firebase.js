@@ -11,8 +11,6 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
-// 有些瀏覽器擴充功能/公司網路會擋住 Firestore 預設的即時串流連線,
-// 開啟自動偵測長輪詢可以在偵測到串流被擋時自動改用相容性較高的連線方式。
 export const db = initializeFirestore(app, {
-  experimentalAutoDetectLongPolling: true,
+  experimentalForceLongPolling: true,
 });

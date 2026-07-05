@@ -153,6 +153,22 @@ section > h2 {
   gap: 8px;
 }
 
+.vote-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.station-badge {
+  background: #ffeef0;
+  color: #d70050;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
 .vote-card .note {
   color: #6e6e73;
   font-size: 14px;

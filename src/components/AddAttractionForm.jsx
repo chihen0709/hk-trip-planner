@@ -5,6 +5,7 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
   const [name, setName] = useState('');
   const [category, setCategory] = useState(CATEGORY_OPTIONS[0]);
   const [note, setNote] = useState('');
+  const [station, setStation] = useState('');
   const [error, setError] = useState('');
 
   function handleSubmit(e) {
@@ -14,7 +15,13 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
       setError('請輸入景點名稱');
       return;
     }
-    onSubmit({ name: trimmedName, category, note: note.trim(), suggestedDay: 99 });
+    onSubmit({
+      name: trimmedName,
+      category,
+      note: note.trim(),
+      station: station.trim(),
+      suggestedDay: 99,
+    });
   }
 
   return (
@@ -45,6 +52,12 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="推薦原因或必吃/必去重點(選填)"
+          />
+          <input
+            type="text"
+            value={station}
+            onChange={(e) => setStation(e.target.value)}
+            placeholder="鄰近地鐵站/區域(選填,例如:佐敦站)"
           />
           {error && <p className="error">{error}</p>}
           <div className="modal-actions">
