@@ -1,3 +1,4 @@
+import './firebase';
 import { Routes, Route, NavLink } from 'react-router-dom';
 import VotePage from './pages/VotePage';
 import ItineraryPage from './pages/ItineraryPage';
