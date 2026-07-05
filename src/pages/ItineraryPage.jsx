@@ -14,9 +14,11 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { subscribeToItinerarySlots, updateSlot, reorderDaySlots } from '../lib/itinerary';
+import { subscribeToAttractions } from '../lib/attractions';
+import { subscribeToAllVotes } from '../lib/votes';
 import ItinerarySlotCard from '../components/ItinerarySlotCard';
 
-function SortableSlot({ slot, onUpdate }) {
+function SortableSlot({ slot, onUpdate, attractions, votesByAttraction }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: slot.id,
   });
@@ -30,6 +32,8 @@ function SortableSlot({ slot, onUpdate }) {
         slot={slot}
         onUpdate={onUpdate}
         dragHandleProps={{ ...attributes, ...listeners }}
+        attractions={attractions}
+        votesByAttraction={votesByAttraction}
       />
     </div>
   );
@@ -37,9 +41,13 @@ function SortableSlot({ slot, onUpdate }) {
 
 export default function ItineraryPage() {
   const [slots, setSlots] = useState([]);
+  const [attractions, setAttractions] = useState([]);
+  const [votesByAttraction, setVotesByAttraction] = useState({});
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => subscribeToItinerarySlots(setSlots), []);
+  useEffect(() => subscribeToAttractions(setAttractions), []);
+  useEffect(() => subscribeToAllVotes(setVotesByAttraction), []);
 
   const days = slots.reduce((acc, slot) => {
     acc[slot.day] = acc[slot.day] || [];
@@ -74,7 +82,13 @@ export default function ItineraryPage() {
             >
               <div className="card-list">
                 {daySlots.map((slot) => (
-                  <SortableSlot key={slot.id} slot={slot} onUpdate={updateSlot} />
+                  <SortableSlot
+                    key={slot.id}
+                    slot={slot}
+                    onUpdate={updateSlot}
+                    attractions={attractions}
+                    votesByAttraction={votesByAttraction}
+                  />
                 ))}
               </div>
             </SortableContext>

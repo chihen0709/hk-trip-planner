@@ -1,18 +1,28 @@
 import { useState } from 'react';
+import AttractionLinkPicker from './AttractionLinkPicker';
 
-export default function ItinerarySlotCard({ slot, onUpdate, dragHandleProps }) {
+export default function ItinerarySlotCard({
+  slot,
+  onUpdate,
+  dragHandleProps,
+  attractions,
+  votesByAttraction,
+}) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState({
     time: slot.time,
     title: slot.title,
     location: slot.location || '',
     note: slot.note || '',
+    linkedAttractionId: slot.linkedAttractionId || null,
   });
 
   function handleSave() {
     onUpdate(slot.id, draft);
     setEditing(false);
   }
+
+  const linkedAttraction = attractions.find((a) => a.id === slot.linkedAttractionId);
 
   if (editing) {
     return (
@@ -37,6 +47,12 @@ export default function ItinerarySlotCard({ slot, onUpdate, dragHandleProps }) {
           onChange={(e) => setDraft({ ...draft, note: e.target.value })}
           placeholder="備註"
         />
+        <AttractionLinkPicker
+          attractions={attractions}
+          votesByAttraction={votesByAttraction}
+          linkedAttractionId={draft.linkedAttractionId}
+          onChange={(id) => setDraft({ ...draft, linkedAttractionId: id })}
+        />
         <button onClick={handleSave}>儲存</button>
       </div>
     );
@@ -51,6 +67,11 @@ export default function ItinerarySlotCard({ slot, onUpdate, dragHandleProps }) {
       <h3>{slot.title}</h3>
       {slot.location && <p className="location">{slot.location}</p>}
       {slot.note && <p className="note">{slot.note}</p>}
+      {linkedAttraction && (
+        <p className="linked-attraction">
+          🔗 {linkedAttraction.name}({(votesByAttraction[linkedAttraction.id] || []).length} 票)
+        </p>
+      )}
       <button onClick={() => setEditing(true)}>編輯</button>
     </div>
   );

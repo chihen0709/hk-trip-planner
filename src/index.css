@@ -176,3 +176,13 @@ section > h2 {
   font-size: 18px;
   align-self: flex-end;
 }
+
+.linked-attraction {
+  background: #eef6ff;
+  color: #0071e3;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 4px 0;
+}
