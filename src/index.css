@@ -1,0 +1,87 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #1d1d1f;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.navbar a.active {
+  background: #e8e8ed;
+}
+
+.nickname-badge {
+  margin-left: auto;
+  font-size: 14px;
+  color: #6e6e73;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 280px;
+}
+
+.modal input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d0d5;
+  font-size: 16px;
+}
+
+.modal .error {
+  color: #d70015;
+  font-size: 14px;
+  margin: 0;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 0 20px 20px;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 20px 20px;
+}
+
+section > h2 {
+  padding: 16px 20px 0;
+}
