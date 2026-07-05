@@ -1,6 +1,11 @@
 import { useState } from 'react';
 
-export default function NicknamePrompt({ onSubmit }) {
+export default function NicknamePrompt({
+  onSubmit,
+  onCancel,
+  title = '歡迎!請輸入你的暱稱',
+  submitLabel = '開始使用',
+}) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
 
@@ -17,7 +22,7 @@ export default function NicknamePrompt({ onSubmit }) {
   return (
     <div className="modal-overlay">
       <form className="modal" onSubmit={handleSubmit}>
-        <h2>歡迎!請輸入你的暱稱</h2>
+        <h2>{title}</h2>
         <input
           type="text"
           value={value}
@@ -26,7 +31,14 @@ export default function NicknamePrompt({ onSubmit }) {
           autoFocus
         />
         {error && <p className="error">{error}</p>}
-        <button type="submit">開始使用</button>
+        <div className="modal-actions">
+          {onCancel && (
+            <button type="button" className="secondary" onClick={onCancel}>
+              取消
+            </button>
+          )}
+          <button type="submit">{submitLabel}</button>
+        </div>
       </form>
     </div>
   );

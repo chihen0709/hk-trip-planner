@@ -26,13 +26,17 @@ export async function toggleVote(attractionId, nickname, hasVoted) {
 }
 
 export function subscribeToAllVotes(callback) {
-  return onSnapshot(collection(db, 'votes'), (snapshot) => {
-    const votesByAttraction = {};
-    snapshot.docs.forEach((d) => {
-      const { attractionId, nickname } = d.data();
-      if (!votesByAttraction[attractionId]) votesByAttraction[attractionId] = [];
-      votesByAttraction[attractionId].push(nickname);
-    });
-    callback(votesByAttraction);
-  });
+  return onSnapshot(
+    collection(db, 'votes'),
+    (snapshot) => {
+      const votesByAttraction = {};
+      snapshot.docs.forEach((d) => {
+        const { attractionId, nickname } = d.data();
+        if (!votesByAttraction[attractionId]) votesByAttraction[attractionId] = [];
+        votesByAttraction[attractionId].push(nickname);
+      });
+      callback(votesByAttraction);
+    },
+    (error) => console.error('subscribeToAllVotes failed:', error)
+  );
 }
