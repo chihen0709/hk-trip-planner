@@ -1,15 +1,14 @@
 import { db } from '../firebase';
 import {
   collection,
-  doc,
   getDocs,
   onSnapshot,
   orderBy,
   query,
-  setDoc,
 } from 'firebase/firestore';
 import seedAttractions from '../../scripts/attractions.seed.json';
-import { withTimeout } from './asyncTimeout';
+import referenceAttractions from '../data/reference-attractions.json';
+import { createFirestoreDocument } from './firestoreRest';
 
 const LOCAL_ATTRACTIONS_KEY = 'hk-trip-planner:local-attractions';
 
@@ -39,7 +38,7 @@ function mergeAttractions(...lists) {
 }
 
 function fallbackAttractions() {
-  return mergeAttractions(seedAttractions, readLocalAttractions());
+  return mergeAttractions(seedAttractions, referenceAttractions, readLocalAttractions());
 }
 
 function attractionDocId(name) {
@@ -52,17 +51,10 @@ function attractionDocId(name) {
 
 async function upsertAttraction(id, attraction) {
   try {
-    await withTimeout(
-      setDoc(doc(db, 'attractions', id), attraction),
-      'Firebase 寫入逾時，請檢查網路後再試一次。'
-    );
+    await createFirestoreDocument('attractions', id, attraction);
   } catch (error) {
-    if (error.code !== 'permission-denied') throw error;
-
-    await withTimeout(
-      setDoc(doc(db, 'attractions', `${id}-${Date.now()}`), attraction),
-      'Firebase 寫入逾時，請檢查網路後再試一次。'
-    );
+    if (error.status !== 403 && error.status !== 409) throw error;
+    await createFirestoreDocument('attractions', `${id}-${Date.now()}`, attraction);
   }
 }
 
@@ -74,7 +66,7 @@ export function subscribeToAttractions(callback, onError) {
   getDocs(q)
     .then((snapshot) => {
       const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      callback(mergeAttractions(seedAttractions, readLocalAttractions(), remote));
+      callback(mergeAttractions(seedAttractions, referenceAttractions, readLocalAttractions(), remote));
     })
     .catch((error) => {
       console.error('subscribeToAttractions initial fetch failed:', error);
@@ -85,7 +77,7 @@ export function subscribeToAttractions(callback, onError) {
     q,
     (snapshot) => {
       const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      callback(mergeAttractions(seedAttractions, readLocalAttractions(), remote));
+      callback(mergeAttractions(seedAttractions, referenceAttractions, readLocalAttractions(), remote));
     },
     (error) => {
       console.error('subscribeToAttractions listener failed:', error);
@@ -105,15 +97,14 @@ export async function addAttraction({ name, category, note, suggestedDay, statio
     suggestedDay,
   };
 
-  try {
-    const { id: _id, ...data } = attraction;
-    await upsertAttraction(id, data);
-  } catch (error) {
-    console.error('addAttraction Firestore write failed, saved locally:', error);
-    writeLocalAttraction(attraction);
-    throw error;
-  }
-
   writeLocalAttraction(attraction);
+  void syncAttractionToFirebase(attraction).catch((error) => {
+    console.error('addAttraction background sync failed:', error);
+  });
   return attraction;
+}
+
+export async function syncAttractionToFirebase(attraction) {
+  const { id, ...data } = attraction;
+  await upsertAttraction(id, data);
 }
