@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { GripVertical, Link as LinkIcon } from 'lucide-react';
+import { GripVertical, Link as LinkIcon, Trash2 } from 'lucide-react';
 import AttractionLinkPicker from './AttractionLinkPicker';
 
 export default function ItinerarySlotCard({
   slot,
   onUpdate,
+  onDelete,
   dragHandleProps,
   attractions,
   votesByAttraction,
@@ -133,6 +134,10 @@ export default function ItinerarySlotCard({
       )}
       <button className="slot-edit-button" type="button" onClick={() => setEditing(true)}>
         編輯
+      </button>
+      <button className="slot-delete-button" type="button" onClick={() => onDelete(slot)}>
+        <Trash2 size={15} aria-hidden="true" />
+        刪除
       </button>
     </div>
   );

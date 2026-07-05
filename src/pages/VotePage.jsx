@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { subscribeToAttractions, addAttraction } from '../lib/attractions';
+import { subscribeToAttractions, addAttraction, deleteAttraction } from '../lib/attractions';
 import { submitVote, subscribeToAllVotes } from '../lib/votes';
 import { CategoryIcon, getCategoryLabel } from '../lib/categoryIcons';
 import VoteCard from '../components/VoteCard';
@@ -56,6 +56,14 @@ export default function VotePage() {
       created,
     ]);
     setShowAddForm(false);
+  }
+
+  function handleDeleteAttraction(attraction) {
+    const shouldDelete = window.confirm(`確定要刪除「${attraction.name}」嗎？同名重複項目也會一起從畫面移除。`);
+    if (!shouldDelete) return;
+
+    deleteAttraction(attraction);
+    setAttractions((current) => current.filter((item) => item.name !== attraction.name));
   }
 
   return (
@@ -116,6 +124,7 @@ export default function VotePage() {
                 onVote={() => {
                   setPendingAttraction(attraction);
                 }}
+                onDelete={() => handleDeleteAttraction(attraction)}
               />
             ))}
           </div>

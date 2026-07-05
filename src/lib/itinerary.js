@@ -12,8 +12,10 @@ import {
 } from 'firebase/firestore';
 import seedSlots from '../../scripts/itinerarySlots.seed.json';
 import { withTimeout } from './asyncTimeout';
+import { deleteFirestoreDocument } from './firestoreRest';
 
 const LOCAL_SLOTS_KEY = 'hk-trip-planner:local-itinerary-slots';
+const DELETED_SLOTS_KEY = 'hk-trip-planner:deleted-itinerary-slots';
 
 function readLocalSlots() {
   try {
@@ -25,6 +27,30 @@ function readLocalSlots() {
 
 function writeLocalSlots(slots) {
   localStorage.setItem(LOCAL_SLOTS_KEY, JSON.stringify(slots));
+}
+
+function readDeletedSlots() {
+  try {
+    return JSON.parse(localStorage.getItem(DELETED_SLOTS_KEY) || '{"ids":[],"signatures":[]}');
+  } catch {
+    return { ids: [], signatures: [] };
+  }
+}
+
+function writeDeletedSlots(deleted) {
+  localStorage.setItem(DELETED_SLOTS_KEY, JSON.stringify({
+    ids: [...new Set(deleted.ids || [])],
+    signatures: [...new Set(deleted.signatures || [])],
+  }));
+}
+
+function slotSignature(slot) {
+  return [
+    slot.day,
+    String(slot.time || '').trim().toLowerCase(),
+    String(slot.title || '').trim().toLowerCase(),
+    String(slot.location || '').trim().toLowerCase(),
+  ].join('|');
 }
 
 function seedWithIds() {
@@ -39,7 +65,21 @@ function mergeSlots(...lists) {
   lists.flat().forEach((item) => {
     if (item?.id) byId.set(item.id, item);
   });
-  return [...byId.values()].sort((a, b) => {
+  const deleted = readDeletedSlots();
+  const deletedIds = new Set(deleted.ids || []);
+  const deletedSignatures = new Set(deleted.signatures || []);
+  const bySignature = new Map();
+  [...byId.values()].forEach((item) => {
+    const signature = slotSignature(item);
+    if (deletedIds.has(item.id) || deletedSignatures.has(signature)) return;
+    const existing = bySignature.get(signature);
+    const shouldReplaceSeed = existing && String(existing.id).startsWith('seed-') && !String(item.id).startsWith('seed-');
+    if (!existing || shouldReplaceSeed) {
+      bySignature.set(signature, item);
+    }
+  });
+
+  return [...bySignature.values()].sort((a, b) => {
     const dayDiff = (a.day ?? 99) - (b.day ?? 99);
     if (dayDiff !== 0) return dayDiff;
     return (a.order ?? 999) - (b.order ?? 999);
@@ -151,4 +191,22 @@ export async function reorderDaySlots(day, orderedSlotIds) {
     return index >= 0 ? { ...slot, order: index } : slot;
   });
   writeLocalSlots(mergeSlots(updatedLocalSlots, seedOrderOverrides));
+}
+
+export function deleteSlot(slot) {
+  const deleted = readDeletedSlots();
+  writeDeletedSlots({
+    ids: [...(deleted.ids || []), slot.id],
+    signatures: [...(deleted.signatures || []), slotSignature(slot)],
+  });
+
+  writeLocalSlots(readLocalSlots().filter((item) => (
+    item.id !== slot.id && slotSignature(item) !== slotSignature(slot)
+  )));
+
+  if (!String(slot.id).startsWith('seed-') && !String(slot.id).startsWith('local-')) {
+    void deleteFirestoreDocument('itinerarySlots', slot.id).catch((error) => {
+      console.error('deleteSlot background sync failed:', error);
+    });
+  }
 }

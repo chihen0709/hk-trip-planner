@@ -41,3 +41,27 @@ export async function createFirestoreDocument(collectionName, documentId, data, 
     window.clearTimeout(timeoutId);
   }
 }
+
+export async function deleteFirestoreDocument(collectionName, documentId, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  const baseUrl = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+  const url = `${baseUrl}/${collectionName}/${encodeURIComponent(documentId)}?key=${firebaseConfig.apiKey}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      signal: controller.signal,
+    });
+
+    if (!response.ok && response.status !== 404) {
+      const detail = await response.text();
+      const error = new Error(`Firestore REST delete failed: ${response.status}`);
+      error.status = response.status;
+      error.detail = detail;
+      throw error;
+    }
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}

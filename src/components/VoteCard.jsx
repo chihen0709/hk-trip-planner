@@ -1,11 +1,11 @@
-import { Heart, MapPin } from 'lucide-react';
+import { Heart, MapPin, Trash2 } from 'lucide-react';
 import { CategoryIcon } from '../lib/categoryIcons';
 
 function buildMapUrl(name) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name} 香港`)}`;
 }
 
-export default function VoteCard({ attraction, voteCount, onVote }) {
+export default function VoteCard({ attraction, voteCount, onVote, onDelete }) {
   return (
     <div className="vote-card">
       <div className="vote-card-top">
@@ -36,6 +36,15 @@ export default function VoteCard({ attraction, voteCount, onVote }) {
           <MapPin size={15} aria-hidden="true" />
           Google Map
         </a>
+        <button
+          className="icon-danger-button"
+          onClick={onDelete}
+          type="button"
+          aria-label={`刪除 ${attraction.name}`}
+          title="刪除景點"
+        >
+          <Trash2 size={16} aria-hidden="true" />
+        </button>
       </div>
     </div>
   );

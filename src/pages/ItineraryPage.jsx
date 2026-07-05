@@ -13,9 +13,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus } from 'lucide-react';
+import { CalendarDays, Save, Trash2, Plus } from 'lucide-react';
 import {
   addSlot,
+  deleteSlot,
   reorderDaySlots,
   subscribeToItinerarySlots,
   updateSlot,
@@ -25,7 +26,7 @@ import { subscribeToAllVotes } from '../lib/votes';
 import AttractionLinkPicker from '../components/AttractionLinkPicker';
 import ItinerarySlotCard from '../components/ItinerarySlotCard';
 
-function SortableSlot({ slot, onUpdate, attractions, votesByAttraction }) {
+function SortableSlot({ slot, onUpdate, onDelete, attractions, votesByAttraction }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: slot.id,
   });
@@ -41,11 +42,127 @@ function SortableSlot({ slot, onUpdate, attractions, votesByAttraction }) {
       <ItinerarySlotCard
         slot={slot}
         onUpdate={onUpdate}
+        onDelete={onDelete}
         dragHandleProps={{ ...attributes, ...listeners }}
         attractions={attractions}
         votesByAttraction={votesByAttraction}
       />
     </div>
+  );
+}
+
+function slotSignature(slot) {
+  return [
+    slot.day,
+    String(slot.time || '').trim().toLowerCase(),
+    String(slot.title || '').trim().toLowerCase(),
+    String(slot.location || '').trim().toLowerCase(),
+  ].join('|');
+}
+
+function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onDeleteSlot }) {
+  const [draft, setDraft] = useState(null);
+
+  useEffect(() => {
+    setDraft(selectedSlot ? {
+      time: selectedSlot.time || '',
+      title: selectedSlot.title || '',
+      location: selectedSlot.location || '',
+      note: selectedSlot.note || '',
+    } : null);
+  }, [selectedSlot]);
+
+  const totalSlots = Object.values(days).reduce((sum, daySlots) => sum + daySlots.length, 0);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    if (!selectedSlot || !draft.time.trim() || !draft.title.trim()) return;
+    await onUpdateSlot(selectedSlot.id, {
+      time: draft.time.trim(),
+      title: draft.title.trim(),
+      location: draft.location.trim(),
+      note: draft.note.trim(),
+    });
+  }
+
+  return (
+    <section className="itinerary-overview" aria-label="行程總覽">
+      <div className="overview-header">
+        <div>
+          <p className="overview-eyebrow">
+            <CalendarDays size={16} aria-hidden="true" />
+            行程總覽
+          </p>
+          <h2>{Object.keys(days).length} 天 / {totalSlots} 個時段</h2>
+        </div>
+      </div>
+
+      <div className="overview-grid">
+        <div className="overview-days">
+          {Object.entries(days).map(([day, daySlots]) => (
+            <div className="overview-day" key={day}>
+              <h3>Day {day}</h3>
+              <div className="overview-slot-list">
+                {daySlots.map((slot) => (
+                  <button
+                    key={slot.id}
+                    type="button"
+                    className={`overview-slot ${selectedSlot?.id === slot.id ? 'active' : ''}`}
+                    onClick={() => onSelectSlot(slot)}
+                  >
+                    <span>{slot.time}</span>
+                    {slot.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <form className="overview-editor" onSubmit={handleSave}>
+          {draft && selectedSlot ? (
+            <>
+              <label className="field-label" htmlFor="overview-time">時間</label>
+              <input
+                id="overview-time"
+                value={draft.time}
+                onChange={(e) => setDraft({ ...draft, time: e.target.value })}
+              />
+              <label className="field-label" htmlFor="overview-title">標題</label>
+              <input
+                id="overview-title"
+                value={draft.title}
+                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+              />
+              <label className="field-label" htmlFor="overview-location">地點</label>
+              <input
+                id="overview-location"
+                value={draft.location}
+                onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+              />
+              <label className="field-label" htmlFor="overview-note">備註</label>
+              <textarea
+                id="overview-note"
+                value={draft.note}
+                onChange={(e) => setDraft({ ...draft, note: e.target.value })}
+              />
+              <div className="overview-actions">
+                <button type="submit">
+                  <Save size={16} aria-hidden="true" />
+                  更新
+                </button>
+                <button type="button" className="danger" onClick={() => onDeleteSlot(selectedSlot)}>
+                  <Trash2 size={16} aria-hidden="true" />
+                  刪除
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="overview-empty">選一個時段，就可以在這裡快速修改。</p>
+          )}
+        </form>
+      </div>
+    </section>
   );
 }
 
@@ -147,6 +264,7 @@ export default function ItineraryPage() {
   const [votesByAttraction, setVotesByAttraction] = useState({});
   const [loadError, setLoadError] = useState(null);
   const [addingDay, setAddingDay] = useState(null);
+  const [selectedSlotId, setSelectedSlotId] = useState(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 6 },
@@ -166,11 +284,26 @@ export default function ItineraryPage() {
     }, {});
   }, [slots]);
 
+  const selectedSlot = useMemo(() => {
+    return slots.find((slot) => slot.id === selectedSlotId) || slots[0] || null;
+  }, [selectedSlotId, slots]);
+
   async function handleUpdateSlot(slotId, fields) {
     setSlots((current) =>
       current.map((slot) => (slot.id === slotId ? { ...slot, ...fields } : slot))
     );
     await updateSlot(slotId, fields);
+  }
+
+  function handleDeleteSlot(slot) {
+    const shouldDelete = window.confirm(`確定要刪除「${slot.title}」這個行程時段嗎？`);
+    if (!shouldDelete) return;
+
+    deleteSlot(slot);
+    setSlots((current) => current.filter((item) => (
+      item.id !== slot.id && slotSignature(item) !== slotSignature(slot)
+    )));
+    if (selectedSlotId === slot.id) setSelectedSlotId(null);
   }
 
   function handleDragEnd(day, daySlots) {
@@ -222,6 +355,16 @@ export default function ItineraryPage() {
       )}
       {!loadError && slots.length === 0 && <p className="load-empty">行程載入中…</p>}
 
+      {slots.length > 0 && (
+        <ItineraryOverview
+          days={days}
+          selectedSlot={selectedSlot}
+          onSelectSlot={(slot) => setSelectedSlotId(slot.id)}
+          onUpdateSlot={handleUpdateSlot}
+          onDeleteSlot={handleDeleteSlot}
+        />
+      )}
+
       {Object.entries(days).map(([day, daySlots]) => (
         <section key={day}>
           <div className="day-heading">
@@ -247,6 +390,7 @@ export default function ItineraryPage() {
                     key={slot.id}
                     slot={slot}
                     onUpdate={handleUpdateSlot}
+                    onDelete={handleDeleteSlot}
                     attractions={attractions}
                     votesByAttraction={votesByAttraction}
                   />

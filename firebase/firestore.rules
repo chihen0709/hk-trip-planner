@@ -8,7 +8,8 @@ service cloud.firestore {
                     && request.resource.data.name.size() > 0
                     && request.resource.data.category is string
                     && request.resource.data.suggestedDay is int;
-      allow update, delete: if false; // 任何人都能新增候選景點,但不能改/刪別人建立的項目
+      allow delete: if true;
+      allow update: if false; // 任何人都能新增/刪除候選景點,但不能改別人建立的項目
     }
 
     match /votes/{voteId} {
@@ -26,7 +27,7 @@ service cloud.firestore {
                     && request.resource.data.order is int
                     && request.resource.data.time is string
                     && request.resource.data.title is string;
-      allow delete: if false;
+      allow delete: if true;
     }
   }
 }
