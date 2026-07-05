@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function ItinerarySlotCard({ slot, onUpdate }) {
+export default function ItinerarySlotCard({ slot, onUpdate, dragHandleProps }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState({
     time: slot.time,
@@ -44,6 +44,9 @@ export default function ItinerarySlotCard({ slot, onUpdate }) {
 
   return (
     <div className="itinerary-card">
+      {dragHandleProps && (
+        <span className="drag-handle" {...dragHandleProps}>⋮⋮</span>
+      )}
       <span className="time">{slot.time}</span>
       <h3>{slot.title}</h3>
       {slot.location && <p className="location">{slot.location}</p>}
