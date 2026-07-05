@@ -1,0 +1,18 @@
+[
+  { "day": 1, "order": 0, "time": "18:30-20:00", "title": "晚餐", "location": "尖沙咀", "note": "可選擇兩草(尖沙咀店)或新光大燈(尖沙咀店)" },
+  { "day": 1, "order": 1, "time": "20:30以後", "title": "微醺之夜", "location": "香港瑰麗酒店 DarkSide酒吧", "note": "亞洲50大酒吧,享受頂級調酒與奢華夜色", "linkedAttractionId": "darkside-bar" },
+  { "day": 2, "order": 0, "time": "08:00-09:00", "title": "早餐", "location": "上環市政大廈 瑞記咖啡", "note": "品嚐地道樽仔奶茶與西多士", "linkedAttractionId": "sui-kee-coffee" },
+  { "day": 2, "order": 1, "time": "09:00-11:00", "title": "中環咖啡散步", "location": "Cupping Room Coffee → 中環半山手扶梯 → Bakehouse中環店", "note": "喝精品咖啡,沿半山手扶梯漫步,順路買酸種蛋塔", "linkedAttractionId": "cupping-room" },
+  { "day": 2, "order": 2, "time": "11:00-15:30", "title": "太平山", "location": "山頂纜車總站 → 摩天台428", "note": "預留4.5小時充裕時間拍照與逛山頂廣場,請於14:45-15:00準備排隊搭纜車下山", "linkedAttractionId": "victoria-peak-sky-terrace-428" },
+  { "day": 2, "order": 3, "time": "15:30-17:00", "title": "午餐", "location": "鼎點 Ding Dim 1968", "note": "搭乘叮叮車前往,享用港式點心", "linkedAttractionId": "ding-dim-1968" },
+  { "day": 2, "order": 4, "time": "17:30-19:30", "title": "張保仔號遊船", "location": "中環9號碼頭", "note": "18:30登船,享受維港景色", "linkedAttractionId": "aqua-luna-junk-boat" },
+  { "day": 2, "order": 5, "time": "19:30-21:30", "title": "晚餐", "location": "IFC國際金融中心", "note": "推薦Shake Shack或添好運", "linkedAttractionId": "ifc-mall-dinner" },
+  { "day": 2, "order": 6, "time": "21:30以後", "title": "蘭桂坊續攤", "location": "The Iron Fairies Hong Kong", "note": "感受震撼視覺", "linkedAttractionId": "iron-fairies-lkf" },
+  { "day": 3, "order": 0, "time": "09:00-10:30", "title": "早餐", "location": "佐敦站", "note": "澳洲牛奶公司或麥文記麵食", "linkedAttractionId": "australia-dairy-company" },
+  { "day": 3, "order": 1, "time": "11:00-12:30", "title": "午餐/冰室", "location": "旺記冰室(尖沙咀店)", "note": "必吃滑蛋雙拼飯", "linkedAttractionId": "wong-chun-chun-tsimshatsui" },
+  { "day": 3, "order": 2, "time": "12:30-13:30", "title": "神級甜點", "location": "尖沙咀", "note": "Hashtag B蛋塔或Bakehouse尖沙咀店", "linkedAttractionId": "hashtag-b-egg-tart" },
+  { "day": 3, "order": 3, "time": "14:00-18:00", "title": "逛街", "location": "旺角商圈", "note": "星際城市買相機、信和中心/現時點買公仔、波鞋街買鞋", "linkedAttractionId": "mongkok-shopping" },
+  { "day": 3, "order": 4, "time": "18:00-20:00", "title": "晚餐", "location": "太子站 一點心", "note": "必點鮮蝦腐皮捲與蘿蔔糕", "linkedAttractionId": "yat-dim-sum-prince-edward" },
+  { "day": 3, "order": 5, "time": "20:30以後", "title": "廟街夜市", "location": "油麻地站", "note": "感受在地活力", "linkedAttractionId": "temple-street-night-market" },
+  { "day": 4, "order": 0, "time": "時段未知", "title": "昂坪360與返程", "location": "上環 → 東涌(寄放行李)→ 昂坪360 → 機場", "note": "截圖僅顯示路線與機場約20:10抵達,詳細時段請依實際航班調整", "linkedAttractionId": "ngong-ping-360" }
+]
