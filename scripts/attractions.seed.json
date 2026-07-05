@@ -1,0 +1,22 @@
+[
+  { "id": "liangcao-tsimshatsui", "name": "兩草(尖沙咀店)", "suggestedDay": 1, "category": "餐廳", "note": "Day1 晚餐選項之一" },
+  { "id": "sun-kwong-tai-tang-tsimshatsui", "name": "新光大燈(尖沙咀店)", "suggestedDay": 1, "category": "餐廳", "note": "Day1 晚餐選項之一" },
+  { "id": "darkside-bar", "name": "DarkSide 酒吧(香港瑰麗酒店)", "suggestedDay": 1, "category": "酒吧", "note": "亞洲50大酒吧,頂級調酒與奢華夜色" },
+  { "id": "sui-kee-coffee", "name": "瑞記咖啡", "suggestedDay": 2, "category": "餐廳", "note": "上環市政大廈內,樽仔奶茶與西多士" },
+  { "id": "cupping-room", "name": "Cupping Room Coffee", "suggestedDay": 2, "category": "咖啡廳", "note": "精品咖啡,鄰近中環半山手扶梯" },
+  { "id": "bakehouse-central", "name": "Bakehouse 中環店", "suggestedDay": 2, "category": "甜點", "note": "超人氣酸種蛋塔" },
+  { "id": "victoria-peak-sky-terrace-428", "name": "太平山 摩天台428", "suggestedDay": 2, "category": "景點", "note": "山頂纜車上山,預留4.5小時" },
+  { "id": "ding-dim-1968", "name": "鼎點 Ding Dim 1968", "suggestedDay": 2, "category": "餐廳", "note": "港式點心午餐" },
+  { "id": "aqua-luna-junk-boat", "name": "張保仔號遊船", "suggestedDay": 2, "category": "景點", "note": "中環9號碼頭登船,維港景色" },
+  { "id": "ifc-mall-dinner", "name": "IFC 國際金融中心晚餐", "suggestedDay": 2, "category": "餐廳", "note": "推薦 Shake Shack 或添好運" },
+  { "id": "iron-fairies-lkf", "name": "The Iron Fairies Hong Kong", "suggestedDay": 2, "category": "酒吧", "note": "蘭桂坊,震撼視覺" },
+  { "id": "australia-dairy-company", "name": "澳洲牛奶公司", "suggestedDay": 3, "category": "餐廳", "note": "佐敦站,經典炒蛋多士" },
+  { "id": "mak-man-kee", "name": "麥文記麵食", "suggestedDay": 3, "category": "餐廳", "note": "澳洲牛奶公司隔壁" },
+  { "id": "wong-chun-chun-tsimshatsui", "name": "旺記冰室(尖沙咀店)", "suggestedDay": 3, "category": "餐廳", "note": "必吃滑蛋雙拼飯" },
+  { "id": "hashtag-b-egg-tart", "name": "Hashtag B 蛋塔", "suggestedDay": 3, "category": "甜點", "note": "尖沙咀近期爆紅甜點" },
+  { "id": "bakehouse-tsimshatsui", "name": "Bakehouse 尖沙咀店", "suggestedDay": 3, "category": "甜點", "note": "Hashtag B 蛋塔的替代選項" },
+  { "id": "mongkok-shopping", "name": "旺角商圈", "suggestedDay": 3, "category": "景點", "note": "星際城市(相機)、信和中心/現時點(公仔)、波鞋街(鞋)" },
+  { "id": "yat-dim-sum-prince-edward", "name": "一點心(太子)", "suggestedDay": 3, "category": "餐廳", "note": "平價米其林港點,必點鮮蝦腐皮捲與蘿蔔糕" },
+  { "id": "temple-street-night-market", "name": "廟街夜市", "suggestedDay": 3, "category": "景點", "note": "油麻地站,在地夜市活力" },
+  { "id": "ngong-ping-360", "name": "昂坪360", "suggestedDay": 4, "category": "景點", "note": "截圖僅顯示路線(上環→東涌寄放行李→昂坪360→機場約20:10),詳細時段未知" }
+]
