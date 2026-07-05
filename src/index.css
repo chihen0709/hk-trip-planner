@@ -126,3 +126,53 @@ section > h2 {
   background: #0071e3;
   color: white;
 }
+
+.itinerary-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.itinerary-card .time {
+  font-size: 13px;
+  color: #0071e3;
+  font-weight: 600;
+}
+
+.itinerary-card .location,
+.itinerary-card .note {
+  color: #6e6e73;
+  font-size: 14px;
+  margin: 0;
+}
+
+.itinerary-card.editing input,
+.itinerary-card.editing textarea {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #d0d0d5;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.itinerary-card button {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid #d0d0d5;
+  background: #f5f5f7;
+  cursor: pointer;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #a0a0a5;
+  font-size: 18px;
+  align-self: flex-end;
+}
