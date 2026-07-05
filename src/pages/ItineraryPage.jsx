@@ -71,7 +71,7 @@ export default function ItineraryPage() {
     <div className="itinerary-page">
       {loadError && (
         <p className="load-error">
-          ⚠️ 讀取行程失敗:{loadError.code || loadError.message}。可能是網路連線問題,請重新整理再試一次。
+          讀取行程失敗: {loadError.code || loadError.message}。可能是網路連線問題，請重新整理再試一次。
         </p>
       )}
       {!loadError && slots.length === 0 && <p className="load-empty">行程載入中…</p>}

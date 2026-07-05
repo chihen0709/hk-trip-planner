@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { CATEGORY_OPTIONS, getCategoryIcon } from '../lib/categoryIcons';
+import { X } from 'lucide-react';
+import { CATEGORY_OPTIONS, getCategoryLabel } from '../lib/categoryIcons';
 
 export default function AddAttractionForm({ onSubmit, onClose }) {
   const [name, setName] = useState('');
@@ -16,6 +17,7 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
       setError('請輸入景點名稱');
       return;
     }
+
     setIsSaving(true);
     setError('');
     try {
@@ -34,43 +36,58 @@ export default function AddAttractionForm({ onSubmit, onClose }) {
   }
 
   return (
-    <div className="modal-overlay">
-      <form className="modal" onSubmit={handleSubmit}>
+    <div className="modal-overlay" role="presentation">
+      <form className="modal" onSubmit={handleSubmit} aria-labelledby="add-attraction-title">
         <div className="modal-header">
-          <h2>➕ 新增候選景點</h2>
+          <h2 id="add-attraction-title">新增候選景點</h2>
           <button type="button" className="modal-close" onClick={onClose} aria-label="關閉">
-            ✕
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
         <div className="modal-body">
+          <label className="field-label" htmlFor="attraction-name">景點名稱</label>
           <input
+            id="attraction-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="例如:澳洲牛奶公司"
+            placeholder="例如：澳洲牛奶公司"
             autoFocus
           />
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORY_OPTIONS.map((c) => (
-              <option key={c} value={c}>
-                {getCategoryIcon(c)} {c}
+
+          <label className="field-label" htmlFor="attraction-category">分類</label>
+          <select
+            id="attraction-category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            {CATEGORY_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {getCategoryLabel(option)}
               </option>
             ))}
           </select>
+
+          <label className="field-label" htmlFor="attraction-note">推薦原因</label>
           <textarea
+            id="attraction-note"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="推薦原因或必吃/必去重點(選填)"
+            placeholder="推薦原因或必吃/必去重點（選填）"
           />
+
+          <label className="field-label" htmlFor="attraction-station">鄰近地鐵站/區域</label>
           <input
+            id="attraction-station"
             type="text"
             value={station}
             onChange={(e) => setStation(e.target.value)}
-            placeholder="鄰近地鐵站/區域(選填,例如:佐敦站)"
+            placeholder="例如：佐敦站"
           />
-          {error && <p className="error">{error}</p>}
+
+          {error && <p className="error" role="alert">{error}</p>}
           <div className="modal-actions">
-            <button type="button" className="secondary" onClick={onClose}>
+            <button type="button" className="secondary" onClick={onClose} disabled={isSaving}>
               取消
             </button>
             <button type="submit" disabled={isSaving}>

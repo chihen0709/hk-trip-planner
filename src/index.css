@@ -48,18 +48,23 @@ body {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(15, 23, 42, 0.58);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  z-index: 100;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   min-width: 300px;
+  width: min(420px, 100%);
   max-width: 90vw;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
 }
 
 .modal-header {
@@ -80,9 +85,14 @@ body {
   border: none;
   background: none;
   color: white;
-  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   line-height: 1;
+  border-radius: 999px;
 }
 
 .modal-body {
@@ -92,8 +102,50 @@ body {
   gap: 12px;
 }
 
+.vote-modal {
+  overflow: visible;
+  padding-top: 24px;
+  text-align: center;
+}
+
+.vote-modal .modal-body {
+  padding: 8px 28px 24px;
+}
+
+.vote-modal-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 8px;
+  border-radius: 999px;
+  background: #dff4f2;
+  color: #2f9e9a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vote-modal h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #1f2937;
+}
+
+.modal-description {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.field-label {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+
 .modal input {
-  padding: 8px 12px;
+  min-height: 44px;
+  padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid #d0d0d5;
   font-size: 16px;
@@ -107,7 +159,8 @@ body {
 
 .modal select,
 .modal textarea {
-  padding: 8px 12px;
+  min-height: 44px;
+  padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid #d0d0d5;
   font-size: 16px;
@@ -121,8 +174,9 @@ body {
 }
 
 .modal-actions button {
-  padding: 8px 16px;
-  border-radius: 20px;
+  min-height: 44px;
+  padding: 9px 18px;
+  border-radius: 8px;
   border: 1px solid #2f9e8f;
   background: #2f9e8f;
   color: white;
@@ -130,8 +184,14 @@ body {
 }
 
 .modal-actions button.secondary {
-  background: white;
-  color: #2f9e8f;
+  background: #e5e7eb;
+  border-color: #e5e7eb;
+  color: #374151;
+}
+
+.modal-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .vote-page,
@@ -174,6 +234,9 @@ section > h2 {
   margin: 0;
   font-size: 17px;
   line-height: 1.35;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .vote-card-top {
@@ -190,6 +253,9 @@ section > h2 {
   padding: 3px 8px;
   border-radius: 999px;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .vote-card .note {
@@ -206,18 +272,25 @@ section > h2 {
   flex-wrap: wrap;
 }
 
-.heart-button {
-  border: none;
-  background: none;
-  font-size: 22px;
-  line-height: 1;
-  padding: 0;
+.vote-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #2f9e8f;
+  background: white;
+  color: #16645c;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 7px 14px;
   cursor: pointer;
-  transition: transform 0.1s ease;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
-.heart-button:active {
-  transform: scale(1.2);
+.vote-button:hover,
+.vote-button:focus-visible {
+  background: #e7f7f5;
+  border-color: #1f8277;
 }
 
 .vote-count {
@@ -226,13 +299,17 @@ section > h2 {
 }
 
 .map-button {
-  padding: 6px 14px;
-  border-radius: 20px;
+  min-height: 38px;
+  padding: 7px 14px;
+  border-radius: 999px;
   background: #2f9e8f;
   color: white;
   text-decoration: none;
   font-size: 13px;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .itinerary-card {
@@ -360,6 +437,14 @@ section > h2 {
   flex-direction: column;
   gap: 6px;
   font-size: 14px;
+}
+
+.donut-legend li,
+.filter-pill,
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .donut-legend-dot {

@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { subscribeToAttractions, addAttraction } from '../lib/attractions';
-import { subscribeToAllVotes, toggleVote } from '../lib/votes';
-import { getCategoryIcon } from '../lib/categoryIcons';
+import { submitVote, subscribeToAllVotes } from '../lib/votes';
+import { CategoryIcon, getCategoryLabel } from '../lib/categoryIcons';
 import VoteCard from '../components/VoteCard';
 import NicknamePrompt from '../components/NicknamePrompt';
 import AddAttractionForm from '../components/AddAttractionForm';
 import CategoryDonutChart from '../components/CategoryDonutChart';
 
-export default function VotePage({ nickname, onSetNickname }) {
+export default function VotePage() {
   const [attractions, setAttractions] = useState([]);
   const [votesByAttraction, setVotesByAttraction] = useState({});
-  const [pendingVoteId, setPendingVoteId] = useState(null);
+  const [pendingAttraction, setPendingAttraction] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [saveError, setSaveError] = useState(null);
@@ -18,7 +18,7 @@ export default function VotePage({ nickname, onSetNickname }) {
   const [activeCategory, setActiveCategory] = useState('all');
 
   useEffect(() => subscribeToAttractions(setAttractions, setLoadError), []);
-  useEffect(() => subscribeToAllVotes(setVotesByAttraction), []);
+  useEffect(() => subscribeToAllVotes(setVotesByAttraction, setLoadError), []);
 
   const categories = [...new Set(attractions.map((a) => a.category))];
 
@@ -28,38 +28,26 @@ export default function VotePage({ nickname, onSetNickname }) {
     return matchesCategory && matchesSearch;
   });
 
-  const grouped = filtered.reduce((acc, a) => {
-    acc[a.category] = acc[a.category] || [];
-    acc[a.category].push(a);
+  const grouped = filtered.reduce((acc, attraction) => {
+    acc[attraction.category] = acc[attraction.category] || [];
+    acc[attraction.category].push(attraction);
     return acc;
   }, {});
 
-  async function handleToggle(attraction, hasVoted) {
-    if (!nickname) {
-      setPendingVoteId(attraction.id);
-      return;
-    }
-
-    setVotesByAttraction((current) => {
-      const voters = new Set(current[attraction.id] || []);
-      if (hasVoted) voters.delete(nickname);
-      else voters.add(nickname);
-      return { ...current, [attraction.id]: [...voters] };
-    });
-    await toggleVote(attraction.id, nickname, hasVoted);
-  }
-
   async function handleNicknameConfirm(name) {
-    onSetNickname(name);
-    if (pendingVoteId) {
-      setVotesByAttraction((current) => {
-        const voters = new Set(current[pendingVoteId] || []);
-        voters.add(name);
-        return { ...current, [pendingVoteId]: [...voters] };
-      });
-      await toggleVote(pendingVoteId, name, false);
+    if (!pendingAttraction) return;
+
+    const existingVoters = votesByAttraction[pendingAttraction.id] || [];
+    if (existingVoters.includes(name)) {
+      throw new Error('這個暱稱已經投過這個景點了，票數不會重複計算。');
     }
-    setPendingVoteId(null);
+
+    await submitVote(pendingAttraction.id, name);
+    setVotesByAttraction((current) => ({
+      ...current,
+      [pendingAttraction.id]: [...(current[pendingAttraction.id] || []), name],
+    }));
+    setPendingAttraction(null);
   }
 
   async function handleAddAttraction(data) {
@@ -82,14 +70,16 @@ export default function VotePage({ nickname, onSetNickname }) {
       <div className="vote-page-header">
         <CategoryDonutChart attractions={attractions} />
         <button className="add-attraction-button" onClick={() => setShowAddForm(true)}>
-          ➕ 新增候選景點
+          新增候選景點
         </button>
       </div>
+
       <div className="filter-bar">
         <input
-          type="text"
+          type="search"
           className="search-input"
-          placeholder="🔍 搜尋名稱"
+          aria-label="搜尋景點名稱"
+          placeholder="搜尋名稱"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
@@ -99,51 +89,55 @@ export default function VotePage({ nickname, onSetNickname }) {
         >
           全部
         </button>
-        {categories.map((c) => (
+        {categories.map((category) => (
           <button
-            key={c}
-            className={`filter-pill ${activeCategory === c ? 'active' : ''}`}
-            onClick={() => setActiveCategory(c)}
+            key={category}
+            className={`filter-pill ${activeCategory === category ? 'active' : ''}`}
+            onClick={() => setActiveCategory(category)}
           >
-            {getCategoryIcon(c)} {c}
+            <CategoryIcon category={category} size={16} />
+            {getCategoryLabel(category)}
           </button>
         ))}
       </div>
+
       {loadError && (
         <p className="load-error">
-          ⚠️ Firebase 讀取暫時失敗，畫面先顯示內建備份資料。錯誤:{loadError.code || loadError.message}
+          Firebase 讀取暫時失敗，畫面先顯示內建備份資料。錯誤: {loadError.code || loadError.message}
         </p>
       )}
       {saveError && <p className="load-error">{saveError}</p>}
       {!loadError && attractions.length === 0 && <p className="load-empty">景點載入中…</p>}
+
       {Object.entries(grouped).map(([category, items]) => (
         <section key={category}>
-          <h2>
-            {getCategoryIcon(category)} {category}
+          <h2 className="section-title">
+            <CategoryIcon category={category} size={22} />
+            {getCategoryLabel(category)}
           </h2>
           <div className="card-grid">
-            {items.map((attraction) => {
-              const voters = votesByAttraction[attraction.id] || [];
-              const hasVoted = nickname ? voters.includes(nickname) : false;
-              return (
-                <VoteCard
-                  key={attraction.id}
-                  attraction={attraction}
-                  voteCount={voters.length}
-                  hasVoted={hasVoted}
-                  onToggle={() => handleToggle(attraction, hasVoted)}
-                />
-              );
-            })}
+            {items.map((attraction) => (
+              <VoteCard
+                key={attraction.id}
+                attraction={attraction}
+                voteCount={(votesByAttraction[attraction.id] || []).length}
+                onVote={() => {
+                  setSaveError(null);
+                  setPendingAttraction(attraction);
+                }}
+              />
+            ))}
           </div>
         </section>
       ))}
-      {pendingVoteId && (
+
+      {pendingAttraction && (
         <NicknamePrompt
           title="留下您的投票足跡"
+          description={`您正在投給「${pendingAttraction.name}」。請輸入暱稱，讓大家知道是誰推薦了這間好店！`}
           submitLabel="確認投票"
           onSubmit={handleNicknameConfirm}
-          onCancel={() => setPendingVoteId(null)}
+          onCancel={() => setPendingAttraction(null)}
         />
       )}
       {showAddForm && (

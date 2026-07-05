@@ -1,8 +1,8 @@
-import { getCategoryColor, getCategoryIcon } from '../lib/categoryIcons';
+import { CategoryIcon, getCategoryColor, getCategoryLabel } from '../lib/categoryIcons';
 
 export default function CategoryDonutChart({ attractions }) {
-  const counts = attractions.reduce((acc, a) => {
-    acc[a.category] = (acc[a.category] || 0) + 1;
+  const counts = attractions.reduce((acc, attraction) => {
+    acc[attraction.category] = (acc[attraction.category] || 0) + 1;
     return acc;
   }, {});
   const total = attractions.length;
@@ -18,7 +18,7 @@ export default function CategoryDonutChart({ attractions }) {
   });
 
   const gradient = segments
-    .map((s) => `${getCategoryColor(s.category)} ${s.start}% ${s.end}%`)
+    .map((segment) => `${getCategoryColor(segment.category)} ${segment.start}% ${segment.end}%`)
     .join(', ');
 
   return (
@@ -30,10 +30,14 @@ export default function CategoryDonutChart({ attractions }) {
         <div className="donut-chart-hole">{total}</div>
       </div>
       <ul className="donut-legend">
-        {segments.map((s) => (
-          <li key={s.category}>
-            <span className="donut-legend-dot" style={{ background: getCategoryColor(s.category) }} />
-            {getCategoryIcon(s.category)} {s.category}({s.count})
+        {segments.map((segment) => (
+          <li key={segment.category}>
+            <span
+              className="donut-legend-dot"
+              style={{ background: getCategoryColor(segment.category) }}
+            />
+            <CategoryIcon category={segment.category} size={14} />
+            {getCategoryLabel(segment.category)}({segment.count})
           </li>
         ))}
       </ul>
