@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { GripVertical, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { getCategoryIcon } from '../lib/categoryIcons';
 import AttractionLinkPicker from './AttractionLinkPicker';
+
+function normalizeLinkedIds(slot) {
+  if (Array.isArray(slot.linkedAttractionIds)) return slot.linkedAttractionIds;
+  if (slot.linkedAttractionId) return [slot.linkedAttractionId];
+  return [];
+}
 
 export default function ItinerarySlotCard({
   slot,
@@ -18,7 +26,7 @@ export default function ItinerarySlotCard({
     title: slot.title,
     location: slot.location || '',
     note: slot.note || '',
-    linkedAttractionId: slot.linkedAttractionId || null,
+    linkedAttractionIds: normalizeLinkedIds(slot),
   });
 
   useEffect(() => {
@@ -28,7 +36,7 @@ export default function ItinerarySlotCard({
         title: slot.title,
         location: slot.location || '',
         note: slot.note || '',
-        linkedAttractionId: slot.linkedAttractionId || null,
+        linkedAttractionIds: normalizeLinkedIds(slot),
       });
     }
   }, [editing, slot]);
@@ -47,27 +55,29 @@ export default function ItinerarySlotCard({
         title: draft.title.trim(),
         location: draft.location.trim(),
         note: draft.note.trim(),
-        linkedAttractionId: draft.linkedAttractionId || null,
+        linkedAttractionIds: draft.linkedAttractionIds,
       });
       setEditing(false);
     } catch (saveError) {
-      setError(saveError.message || '儲存失敗，請稍後再試。');
+      setError(saveError.message || '儲存失敗,請稍後再試。');
     } finally {
       setIsSaving(false);
     }
   }
 
-  const linkedAttraction = attractions.find((attraction) => attraction.id === slot.linkedAttractionId);
+  const linkedAttractions = normalizeLinkedIds(slot)
+    .map((id) => attractions.find((attraction) => attraction.id === id))
+    .filter(Boolean);
 
   if (editing) {
     return (
-      <div className="itinerary-card editing">
+      <div id={`slot-${slot.id}`} className="itinerary-card editing">
         <label className="field-label" htmlFor={`slot-time-${slot.id}`}>時間</label>
         <input
           id={`slot-time-${slot.id}`}
           value={draft.time}
           onChange={(e) => setDraft({ ...draft, time: e.target.value })}
-          placeholder="例如：20:30以後"
+          placeholder="例如:20:30以後"
         />
 
         <label className="field-label" htmlFor={`slot-title-${slot.id}`}>標題</label>
@@ -75,7 +85,7 @@ export default function ItinerarySlotCard({
           id={`slot-title-${slot.id}`}
           value={draft.title}
           onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-          placeholder="例如：廟街夜市"
+          placeholder="例如:廟街夜市"
         />
 
         <label className="field-label" htmlFor={`slot-location-${slot.id}`}>地點</label>
@@ -83,7 +93,7 @@ export default function ItinerarySlotCard({
           id={`slot-location-${slot.id}`}
           value={draft.location}
           onChange={(e) => setDraft({ ...draft, location: e.target.value })}
-          placeholder="例如：油麻地站"
+          placeholder="例如:油麻地站"
         />
 
         <label className="field-label" htmlFor={`slot-note-${slot.id}`}>備註</label>
@@ -98,8 +108,8 @@ export default function ItinerarySlotCard({
         <AttractionLinkPicker
           attractions={attractions}
           votesByAttraction={votesByAttraction}
-          linkedAttractionId={draft.linkedAttractionId}
-          onChange={(id) => setDraft({ ...draft, linkedAttractionId: id })}
+          linkedAttractionIds={draft.linkedAttractionIds}
+          onChange={(ids) => setDraft({ ...draft, linkedAttractionIds: ids })}
         />
 
         {error && <p className="error" role="alert">{error}</p>}
@@ -116,7 +126,7 @@ export default function ItinerarySlotCard({
   }
 
   return (
-    <div className="itinerary-card">
+    <div id={`slot-${slot.id}`} className="itinerary-card">
       {dragHandleProps && (
         <button className="drag-handle" type="button" aria-label="拖曳排序" {...dragHandleProps}>
           <GripVertical size={18} aria-hidden="true" />
@@ -126,11 +136,23 @@ export default function ItinerarySlotCard({
       <h3>{slot.title}</h3>
       {slot.location && <p className="location">{slot.location}</p>}
       {slot.note && <p className="note">{slot.note}</p>}
-      {linkedAttraction && (
-        <p className="linked-attraction">
-          <LinkIcon size={14} aria-hidden="true" />
-          {linkedAttraction.name} ({(votesByAttraction[linkedAttraction.id] || []).length} 票)
-        </p>
+      {linkedAttractions.length > 0 && (
+        <div className="linked-attraction-chips">
+          {linkedAttractions.map((attraction) => (
+            <Link
+              key={attraction.id}
+              to={`/vote?highlight=${attraction.id}`}
+              className="linked-attraction-chip"
+              title={`前往投票頁查看「${attraction.name}」`}
+            >
+              <LinkIcon size={13} aria-hidden="true" />
+              {getCategoryIcon(attraction.category)} {attraction.name}
+              <span className="linked-attraction-votes">
+                {(votesByAttraction[attraction.id] || []).length} 票
+              </span>
+            </Link>
+          ))}
+        </div>
       )}
       <button className="slot-edit-button" type="button" onClick={() => setEditing(true)}>
         編輯

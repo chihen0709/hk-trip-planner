@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { subscribeToAttractions, addAttraction, deleteAttraction } from '../lib/attractions';
 import { submitVote, subscribeToAllVotes } from '../lib/votes';
 import { CategoryIcon, getCategoryLabel } from '../lib/categoryIcons';
@@ -15,9 +16,24 @@ export default function VotePage() {
   const [loadError, setLoadError] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightId = searchParams.get('highlight');
 
   useEffect(() => subscribeToAttractions(setAttractions, setLoadError), []);
   useEffect(() => subscribeToAllVotes(setVotesByAttraction, setLoadError), []);
+
+  useEffect(() => {
+    if (!highlightId || attractions.length === 0) return;
+    const target = document.getElementById(`attraction-${highlightId}`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    const timeout = setTimeout(() => {
+      searchParams.delete('highlight');
+      setSearchParams(searchParams, { replace: true });
+    }, 2500);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightId, attractions.length]);
 
   const categories = [...new Set(attractions.map((a) => a.category))];
 
@@ -121,6 +137,7 @@ export default function VotePage() {
                 key={attraction.id}
                 attraction={attraction}
                 voteCount={(votesByAttraction[attraction.id] || []).length}
+                highlighted={highlightId === attraction.id}
                 onVote={() => {
                   setPendingAttraction(attraction);
                 }}

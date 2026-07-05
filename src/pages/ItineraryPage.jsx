@@ -13,7 +13,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { CalendarDays, Save, Trash2, Plus } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import { CalendarDays, Download, Save, Trash2, Plus } from 'lucide-react';
 import {
   addSlot,
   deleteSlot,
@@ -62,6 +63,7 @@ function slotSignature(slot) {
 
 function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onDeleteSlot }) {
   const [draft, setDraft] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     setDraft(selectedSlot ? {
@@ -85,8 +87,31 @@ function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onD
     });
   }
 
+  function handleSelectAndScroll(slot) {
+    onSelectSlot(slot);
+    const target = document.getElementById(`slot-${slot.id}`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function handleDownload() {
+    const node = document.getElementById('itinerary-overview-card');
+    if (!node) return;
+    setIsExporting(true);
+    try {
+      const dataUrl = await toPng(node, { backgroundColor: '#ffffff', pixelRatio: 2 });
+      const link = document.createElement('a');
+      link.download = '香港行程總覽.png';
+      link.href = dataUrl;
+      link.click();
+    } catch (exportError) {
+      console.error('匯出圖片失敗:', exportError);
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   return (
-    <section className="itinerary-overview" aria-label="行程總覽">
+    <section className="itinerary-overview" id="itinerary-overview-card" aria-label="行程總覽">
       <div className="overview-header">
         <div>
           <p className="overview-eyebrow">
@@ -95,6 +120,15 @@ function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onD
           </p>
           <h2>{Object.keys(days).length} 天 / {totalSlots} 個時段</h2>
         </div>
+        <button
+          type="button"
+          className="overview-download-button"
+          onClick={handleDownload}
+          disabled={isExporting}
+        >
+          <Download size={16} aria-hidden="true" />
+          {isExporting ? '產生中…' : '下載圖片'}
+        </button>
       </div>
 
       <div className="overview-grid">
@@ -108,7 +142,7 @@ function ItineraryOverview({ days, selectedSlot, onSelectSlot, onUpdateSlot, onD
                     key={slot.id}
                     type="button"
                     className={`overview-slot ${selectedSlot?.id === slot.id ? 'active' : ''}`}
-                    onClick={() => onSelectSlot(slot)}
+                    onClick={() => handleSelectAndScroll(slot)}
                   >
                     <span>{slot.time}</span>
                     {slot.title}
@@ -174,7 +208,7 @@ function NewSlotForm({ day, nextOrder, attractions, votesByAttraction, onSubmit,
     title: '',
     location: '',
     note: '',
-    linkedAttractionId: null,
+    linkedAttractionIds: [],
   });
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -241,8 +275,8 @@ function NewSlotForm({ day, nextOrder, attractions, votesByAttraction, onSubmit,
       <AttractionLinkPicker
         attractions={attractions}
         votesByAttraction={votesByAttraction}
-        linkedAttractionId={draft.linkedAttractionId}
-        onChange={(id) => setDraft({ ...draft, linkedAttractionId: id })}
+        linkedAttractionIds={draft.linkedAttractionIds}
+        onChange={(ids) => setDraft({ ...draft, linkedAttractionIds: ids })}
       />
 
       {error && <p className="error" role="alert">{error}</p>}

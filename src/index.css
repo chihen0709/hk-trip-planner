@@ -437,6 +437,114 @@ section > h2 {
   margin: 4px 0;
 }
 
+.linked-attraction-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.linked-attraction-chip {
+  background: #eef6ff;
+  color: #16645c;
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  border: 1px solid #cfe6e2;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.linked-attraction-chip:hover,
+.linked-attraction-chip:focus-visible {
+  background: #dff4f2;
+  border-color: #2f9e8f;
+}
+
+.linked-attraction-votes {
+  color: #2f9e8f;
+  font-weight: 700;
+}
+
+.attraction-link-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link-picker-search {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d0d5;
+  font-size: 14px;
+}
+
+.link-picker-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.link-picker-list {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #e3edf6;
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.link-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.link-picker-item:hover {
+  background: #f4f7fb;
+}
+
+.link-picker-item.checked {
+  background: #dff4f2;
+}
+
+.link-picker-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.link-picker-votes {
+  margin-left: auto;
+  color: #2f9e8f;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.link-picker-empty {
+  margin: 8px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.vote-card.highlighted {
+  animation: highlight-pulse 2.5s ease;
+  border-color: #2f9e8f;
+}
+
+@keyframes highlight-pulse {
+  0% { box-shadow: 0 0 0 4px rgba(47, 158, 143, 0.35); }
+  100% { box-shadow: 0 8px 22px rgba(35, 65, 94, 0.06); }
+}
+
 .slot-edit-actions {
   display: flex;
   gap: 8px;
@@ -625,8 +733,34 @@ section > h2 {
 .overview-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.overview-download-button {
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #2f9e8f;
+  background: white;
+  color: #16645c;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.overview-download-button:hover,
+.overview-download-button:focus-visible {
+  background: #e7f7f5;
+}
+
+.overview-download-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .overview-header h2 {

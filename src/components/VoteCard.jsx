@@ -5,9 +5,9 @@ function buildMapUrl(name) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name} 香港`)}`;
 }
 
-export default function VoteCard({ attraction, voteCount, onVote, onDelete }) {
+export default function VoteCard({ attraction, voteCount, onVote, onDelete, highlighted }) {
   return (
-    <div className="vote-card">
+    <div id={`attraction-${attraction.id}`} className={`vote-card ${highlighted ? 'highlighted' : ''}`}>
       <div className="vote-card-top">
         <h3>
           <CategoryIcon category={attraction.category} size={18} />
