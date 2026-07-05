@@ -136,7 +136,7 @@ export default function VotePage() {
               <VoteCard
                 key={attraction.id}
                 attraction={attraction}
-                voteCount={(votesByAttraction[attraction.id] || []).length}
+                voters={votesByAttraction[attraction.id] || []}
                 highlighted={highlightId === attraction.id}
                 onVote={() => {
                   setPendingAttraction(attraction);
