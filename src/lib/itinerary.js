@@ -9,16 +9,23 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 
-export function subscribeToItinerarySlots(callback) {
+export function subscribeToItinerarySlots(callback, onError) {
   const q = query(
     collection(db, 'itinerarySlots'),
     orderBy('day'),
     orderBy('order')
   );
-  return onSnapshot(q, (snapshot) => {
-    const slots = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-    callback(slots);
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const slots = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      callback(slots);
+    },
+    (error) => {
+      console.error('subscribeToItinerarySlots failed:', error);
+      if (onError) onError(error);
+    }
+  );
 }
 
 export async function updateSlot(slotId, fields) {

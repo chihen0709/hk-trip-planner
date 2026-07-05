@@ -12,11 +12,22 @@ export default function VotePage({ nickname, onSetNickname }) {
   const [votesByAttraction, setVotesByAttraction] = useState({});
   const [pendingVoteId, setPendingVoteId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [searchText, setSearchText] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
 
-  useEffect(() => subscribeToAttractions(setAttractions), []);
+  useEffect(() => subscribeToAttractions(setAttractions, setLoadError), []);
   useEffect(() => subscribeToAllVotes(setVotesByAttraction), []);
 
-  const grouped = attractions.reduce((acc, a) => {
+  const categories = [...new Set(attractions.map((a) => a.category))];
+
+  const filtered = attractions.filter((a) => {
+    const matchesCategory = activeCategory === 'all' || a.category === activeCategory;
+    const matchesSearch = a.name.toLowerCase().includes(searchText.trim().toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const grouped = filtered.reduce((acc, a) => {
     acc[a.category] = acc[a.category] || [];
     acc[a.category].push(a);
     return acc;
@@ -51,6 +62,36 @@ export default function VotePage({ nickname, onSetNickname }) {
           ➕ 新增候選景點
         </button>
       </div>
+      <div className="filter-bar">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="🔍 搜尋名稱"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+        <button
+          className={`filter-pill ${activeCategory === 'all' ? 'active' : ''}`}
+          onClick={() => setActiveCategory('all')}
+        >
+          全部
+        </button>
+        {categories.map((c) => (
+          <button
+            key={c}
+            className={`filter-pill ${activeCategory === c ? 'active' : ''}`}
+            onClick={() => setActiveCategory(c)}
+          >
+            {getCategoryIcon(c)} {c}
+          </button>
+        ))}
+      </div>
+      {loadError && (
+        <p className="load-error">
+          ⚠️ 讀取景點失敗:{loadError.code || loadError.message}。可能是網路連線問題或瀏覽器擴充功能封鎖了連線,請重新整理再試一次。
+        </p>
+      )}
+      {!loadError && attractions.length === 0 && <p className="load-empty">景點載入中…</p>}
       {Object.entries(grouped).map(([category, items]) => (
         <section key={category}>
           <h2>

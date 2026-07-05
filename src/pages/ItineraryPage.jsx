@@ -43,9 +43,10 @@ export default function ItineraryPage() {
   const [slots, setSlots] = useState([]);
   const [attractions, setAttractions] = useState([]);
   const [votesByAttraction, setVotesByAttraction] = useState({});
+  const [loadError, setLoadError] = useState(null);
   const sensors = useSensors(useSensor(PointerSensor));
 
-  useEffect(() => subscribeToItinerarySlots(setSlots), []);
+  useEffect(() => subscribeToItinerarySlots(setSlots, setLoadError), []);
   useEffect(() => subscribeToAttractions(setAttractions), []);
   useEffect(() => subscribeToAllVotes(setVotesByAttraction), []);
 
@@ -68,6 +69,12 @@ export default function ItineraryPage() {
 
   return (
     <div className="itinerary-page">
+      {loadError && (
+        <p className="load-error">
+          ⚠️ 讀取行程失敗:{loadError.code || loadError.message}。可能是網路連線問題,請重新整理再試一次。
+        </p>
+      )}
+      {!loadError && slots.length === 0 && <p className="load-empty">行程載入中…</p>}
       {Object.entries(days).map(([day, daySlots]) => (
         <section key={day}>
           <h2>Day {day}</h2>

@@ -9,11 +9,11 @@ const CATEGORY_ICONS = {
 };
 
 const CATEGORY_COLORS = {
-  餐廳: '#FF6B6B',
-  景點: '#4ECDC4',
-  酒吧: '#A78BFA',
-  甜點: '#FFB86B',
-  咖啡廳: '#8B5E3C',
+  餐廳: '#2F9E8F',
+  景點: '#57B8AC',
+  酒吧: '#1F6E63',
+  甜點: '#7FD1C5',
+  咖啡廳: '#134A42',
 };
 
 export function getCategoryIcon(category) {

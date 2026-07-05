@@ -22,22 +22,31 @@ export default function NicknamePrompt({
   return (
     <div className="modal-overlay">
       <form className="modal" onSubmit={handleSubmit}>
-        <h2>{title}</h2>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="例如:小明"
-          autoFocus
-        />
-        {error && <p className="error">{error}</p>}
-        <div className="modal-actions">
+        <div className="modal-header">
+          <h2>💚 {title}</h2>
           {onCancel && (
-            <button type="button" className="secondary" onClick={onCancel}>
-              取消
+            <button type="button" className="modal-close" onClick={onCancel} aria-label="關閉">
+              ✕
             </button>
           )}
-          <button type="submit">{submitLabel}</button>
+        </div>
+        <div className="modal-body">
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="例如:小明"
+            autoFocus
+          />
+          {error && <p className="error">{error}</p>}
+          <div className="modal-actions">
+            {onCancel && (
+              <button type="button" className="secondary" onClick={onCancel}>
+                取消
+              </button>
+            )}
+            <button type="submit">{submitLabel}</button>
+          </div>
         </div>
       </form>
     </div>
