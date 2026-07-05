@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /attractions/{attractionId} {
+      allow read: if true;
+      allow write: if false; // 只透過本機種子腳本(firebase-admin,略過規則)寫入
+    }
+
+    match /votes/{voteId} {
+      allow read: if true;
+      allow create: if request.resource.data.nickname is string
+                    && request.resource.data.nickname.size() > 0
+                    && request.resource.data.attractionId is string
+                    && voteId == request.resource.data.attractionId + '_' + request.resource.data.nickname;
+      allow delete: if true;
+    }
+
+    match /itinerarySlots/{slotId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.day is int
+                    && request.resource.data.order is int
+                    && request.resource.data.time is string
+                    && request.resource.data.title is string;
+      allow delete: if false;
+    }
+  }
+}
